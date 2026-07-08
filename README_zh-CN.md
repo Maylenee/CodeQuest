@@ -1,124 +1,160 @@
-# RAG Agent
+# CodeQuest
 
-跑在 EdgeOne Makers 上的检索增强对话 Agent：基于本地 PDF 知识库回答问题，并附带页级引用，全程 SSE 流式返回。后端使用 OpenAI Agents SDK（Python）。
-
-**Framework：** OpenAI Agents SDK · **Category：** File Processing <!-- TODO: confirm --> · **Language：** Python
-
-[![Deploy to EdgeOne Makers](https://cdnstatic.tencentcs.com/edgeone/pages/deploy.svg)](https://console.cloud.tencent.com/edgeone/pages/new?template=rag-agent)
-
-<!-- ![preview](./assets/preview.png)  TODO: confirm -->
+一个游戏化的编程学习平台 —— 面向 Python 与 JavaScript 的互动课程、每日任务与进度追踪。基于 React + Vite + TypeScript，后端使用 EdgeOne 云函数。
 
 ## 概述
 
-一个完整能跑的企业 RAG 模板：把 PDF 丢进 `public/prepare-rag/files/`，跑一条命令构建知识库，Agent 就能基于这些资料回答问题并给出页级引用。检索层是一个文件系统加载器 —— 没有向量库、没有额外服务要运维 —— 模板因此保持可读。把 loader 换成你自己的检索实现，整套流水线照常工作。
+CodeQuest 通过互动、小步快跑的课程和游戏化机制帮助初学者学编程：
 
-- **带引用的回答** —— 每条结论都通过 `search_document` 与 `fetch_pages` 工具回链到具体文档与页码。
-- **流式 + 工具可视化** —— UI 实时渲染 `tool-input-available` / `tool-output-available` 事件，让用户看到 Agent 正在读哪些来源。
-- **文件系统知识库** —— `prepare_rag_data.py` 把 PDF 抽取为 `agents/_data/{docId}/pages/{n}.txt`；`_loader.py` 在请求时按需读取，且做路径穿越保护。
-- **会话粘性记忆** —— `context.store.openai_session(conversation_id)` 保留多轮上下文；无状态的 `/history` cloud function 用于刷新页面后恢复对话。
-- **可信中断** —— `/stop` 通过 `context.utils.abort_active_run()` 真正中断正在进行的 LLM 调用。
+- **互动课程** — 单选/多选、填空、预测输出、找 Bug、编写代码、拖拽排序等题型
+- **双学习赛道** — Python 与 JavaScript，各自拥有结构化学习路径
+- **游戏化进阶** — XP、等级、连胜、生命值（爱心）、宝石、段位、每日目标
+- **每日任务** — 每日编程挑战，建立学习连胜
+- **排行榜** — 与其他学习者竞争
+- **AI 聊天助手** — 每节课专属聊天历史，用于提问/获取提示
+- **引导流程** — 个性化赛道选择、技能评估、每日目标、通知设置
 
-## 环境变量
+## 技术栈
 
-| 变量 | 必填 | 说明 |
-|------|------|------|
-| `AI_GATEWAY_API_KEY` | 是 | 模型网关 API Key。可填 Makers Models 的 API Key，也可以是任意 OpenAI 兼容服务商的 Key。 |
-| `AI_GATEWAY_BASE_URL` | 是 | 网关 Base URL。Makers Models 请使用 `https://ai-gateway.edgeone.link/v1`。 |
-| `AI_GATEWAY_MODEL` | 否 | 模型 ID。默认 `@makers/deepseek-v4-flash`（内置免费模型）。 |
-
-模板遵循 OpenAI 兼容协议，可以指向 Makers Models，也可以指向任意 OpenAI 兼容的服务商。
-
-### 如何获取 `AI_GATEWAY_API_KEY`
-
-1. 打开 [Makers 控制台](https://console.cloud.tencent.com/edgeone/makers)。
-2. 登录并开通 Makers。
-3. 进入 **Makers → Models → API Key**，新建一个 Key。
-4. 把它粘到 `AI_GATEWAY_API_KEY`。
-
-内置的 `@makers/deepseek-v4-flash` 免费但有用量限制，适合验证；生产建议自行绑定付费厂商（BYOK）。
-
-## 本地开发
-
-前置依赖：Node.js ≥ 18、Python ≥ 3.10，以及 EdgeOne CLI（`npm i -g edgeone`）。
-
-```bash
-npm install
-pip install -r agents/requirements.txt
-pip install -r public/prepare-rag/requirements.txt
-cp .env.example .env       # 然后填入 AI_GATEWAY_API_KEY / AI_GATEWAY_BASE_URL
-
-# 把 PDF 放到 public/prepare-rag/files/，再构建知识库
-npm run prepare-rag
-
-edgeone makers dev
-```
-
-本地观测面板：`http://localhost:8080/agent-metrics`。
+| 层级 | 技术 |
+|------|------|
+| 前端 | React 18 + TypeScript + Vite |
+| 状态管理 | Zustand |
+| 样式 | CSS Variables + CSS Modules |
+| 后端 | EdgeOne 云函数 |
+| 数据库 | EdgeOne KV / D1（通过云函数） |
+| 部署 | EdgeOne Pages / Makers |
 
 ## 项目结构
 
-```text
-rag-agent/
-├── agents/                          # 有状态的 EdgeOne Makers Agent Functions（Python）
-│   ├── chat/index.py               # POST /chat —— 流式 RAG 聊天
-│   ├── chat/_stream.py             # SSE 流式工具（私有）
-│   ├── stop/index.py               # POST /stop —— 中断当前 agent
-│   ├── rag-stats/index.py          # POST /rag-stats —— 知识库统计
-│   ├── _agent.py                   # RAG Agent 定义（私有）
-│   ├── _tools.py                   # search_document、fetch_pages 工具（私有）
-│   ├── _loader.py                  # 文件系统知识库读取（私有）
-│   ├── _model.py                   # LLM 配置（私有）
-│   ├── _data/                      # 生成的知识库（gitignore）
-│   └── requirements.txt            # Python agent 依赖
-├── cloud-functions/                 # 无状态的 EdgeOne Makers Python cloud functions
-│   ├── history/index.py            # POST /history —— 拉取对话消息
-│   └── _logger.py                  # 日志工具
-├── public/prepare-rag/              # PDF → 结构化文本流水线
-│   ├── prepare_rag_data.py
-│   ├── requirements.txt
-│   └── files/                      # 在这里放置源 PDF
-├── src/                             # React + Vite 前端
-│   ├── App.tsx                     # 根组件
-│   ├── api.ts                      # SSE 流客户端
+```
+CodeQuest/
+├── cloud-functions/              # EdgeOne Python 云函数
+│   ├── user/                     # 用户初始化、获取、连胜
+│   ├── progress/                 # 进度更新
+│   ├── submissions/              # 代码提交
+│   ├── questions/                # 题目获取与验证
+│   ├── leaderboard/              # 排行榜
+│   ├── chat-history/             # 每课聊天历史
+│   ├── history/                  # 历史记录
+│   └── seed/                     # 数据库种子
+├── public/prepare-rag/           # RAG 数据预处理（旧版/未使用）
+├── src/
+│   ├── api.ts                    # 云函数 API 客户端
+│   ├── App.tsx                   # 应用路由（选择 → 问卷 → 学习）
+│   ├── main.tsx                  # 入口
+│   ├── index.css                 # 全局样式（CSS 变量）
+│   ├── lib/
+│   │   ├── store.ts              # Zustand store（用户、进度、UI 状态）
+│   │   ├── types.ts              # TS 类型（UserData, Question, LessonNode）
+│   │   └── utils.ts              # 工具函数
 │   └── components/
-│       ├── RagChat.tsx             # 流式 + 工具可视化的对话 UI
-│       ├── CitationCard.tsx        # 来源引用展示
-│       └── KnowledgeBaseSummary.tsx
+│       ├── ui/                   # 通用 UI（Button, Card, Modal, ProgressBar, Mascot, Confetti）
+│       ├── onboarding/           # 引导流程（SelectionScreen, SurveyFlow, 各步骤）
+│       ├── learn/                # 学习页面（LearnPage, LearningPath, DailyMissions, Sidebar, StatusBar）
+│       └── questions/            # 题目组件（MCQ, FillBlank, PredictOutput, LessonPage）
+├── agents/                       # 旧版 RAG Agent（未使用）
+├── edgeone.json                  # EdgeOne 配置
 ├── package.json
-├── edgeone.json                     # framework=openai-agents-sdk，agents.timeout=300，sandbox.timeout=300
-└── vite.config.ts
+├── tsconfig.json
+├── vite.config.ts
+└── README.md
 ```
 
-> 以 `_` 开头的文件是私有模块，不会暴露为公开路由。
+## 快速开始
 
-## 工作原理（How It Works）
+### 前置依赖
 
-`agents/` 跑的是**会话模式**：携带相同 `Markers-Conversation-Id` HTTP Header 的请求会粘性路由到同一个 Agent 实例，共享同一份内存状态与同一个 EdgeOne 沙箱。这种粘性正是 `/chat`（SSE 流）与 `/stop`（中断）能命中同一个正在跑的任务的前提。注意 `/stop` 的会话 ID 走的是 body 而不是 header，避免与活跃 SSE 流的 cancel 信号撞车。
+- Node.js ≥ 18
+- Python ≥ 3.10（云函数用）
+- EdgeOne CLI：`npm i -g edgeone`
 
-端到端流程：
+### 本地开发
 
-1. **构建知识库（离线）**：`prepare_rag_data.py` 从 `public/prepare-rag/files/` 读 PDF，输出 `agents/_data/{docId}/meta.json` + `pages/{n}.txt`（可选 `structure.json` 页面树）。`agents/_data/index.json` 是文档清单。
-2. **请求入口**：`POST /chat`（由 `agents/chat/index.py` 处理）通过 `context.store.openai_session(conversation_id)` 拉取历史，并启动 `_agent.py` 中定义的 OpenAI Agents SDK Agent。
-3. **LLM ↔ 工具循环**：Agent 拥有 `_tools.py` 中定义的两个工具：
-   - `search_document(query)` —— 从本地知识库检索候选页
-   - `fetch_pages(doc_id, pages)` —— 精确读取页文本用于引用
-   最多 6 轮；`_loader.py` 强制在 `Path(__file__).parent / "_data"` 范围内做路径穿越保护。
-4. **流式输出**：handler 推送 SSE 事件 `start`、`text-start`、`text-delta`、`text-end`、`tool-input-available`、`tool-output-available`、`finish`、`error`，前端 `useAgentStream` reducer 将其转成对话气泡 + 引用卡片。
-5. **统计 / 历史 / 中断**：`POST /rag-stats`（在 `agents/`）返回知识库元信息；`POST /history`（在 `cloud-functions/`）走 `context.agent.store.get_messages()` 用于刷新后恢复；`POST /stop` 取消当前 run。
+```bash
+# 安装前端依赖
+npm install
 
-沙箱凭证由运行时自动注入，无需本地配置。`edgeone.json` 中 `agents.timeout` 与 `agents.sandbox.timeout` 均为 300 秒。
+# 安装云函数依赖
+pip install -r cloud-functions/requirements.txt  # 若存在，或各函数单独安装
 
-内置的示例知识库：
+# 复制环境变量并配置
+cp .env.example .env
+# 填入 EdgeOne 凭证
 
-- **EdgeOne-Pages-Platform-Guide.pdf** —— 平台架构、`context.store`、SSE 流、部署。
-- **Building-RAG-Applications.pdf** —— RAG 模式、检索策略、引用、评测。
+# 启动开发服务器（前端 + 云函数）
+edgeone pages dev
+```
 
-## 资源
+或仅运行前端：
 
-- [EdgeOne Makers Agents 文档](https://cloud.tencent.com/document/product/1552/132759)
-- [EdgeOne Makers 快速开始](https://cloud.tencent.com/document/product/1552/132786)
-- [Makers Models](https://cloud.tencent.com/document/product/1552/132748)
+```bash
+npm run dev
+```
 
-## License
+### 环境变量
 
-MIT.
+| 变量 | 必填 | 说明 |
+|------|------|------|
+| `EDGEONE_API_TOKEN` | 是 | EdgeOne API Token，用于云函数部署 |
+| `EDGEONE_PROJECT_NAME` | 是 | EdgeOne 项目名称 |
+
+## 云函数
+
+`cloud-functions/` 下每个文件夹是一个独立的 EdgeOne Function（Python）：
+
+| 函数 | 路由 | 用途 |
+|------|------|------|
+| `user/init` | POST `/user/init` | 初始化新用户 |
+| `user/get` | GET `/user/get` | 获取用户档案 |
+| `user/streak` | POST `/user/streak` | 更新连胜 |
+| `progress/update` | POST `/progress/update` | 更新课程进度 |
+| `submissions/create` | POST `/submissions/create` | 保存代码提交 |
+| `questions/get` | GET `/questions/get` | 获取课程题目 |
+| `questions/verify` | POST `/questions/verify` | 验证答案 |
+| `leaderboard/get` | GET `/leaderboard/get` | 获取排行榜 |
+| `chat-history` | POST `/chat-history` | 获取/保存聊天历史 |
+| `seed/init` | POST `/seed/init` | 初始化种子数据 |
+| `seed/get` | GET `/seed/get` | 获取种子数据 |
+
+## 功能概览
+
+### 学习赛道
+- **Python** — 变量、循环、函数、数据结构、面向对象、模块
+- **JavaScript** — 变量、函数、DOM、异步、ES6+、框架基础
+
+### 题目类型
+| 类型 | 组件 | 说明 |
+|------|------|------|
+| `mcq` | `MultipleChoice.tsx` | 单选/多选 |
+| `fill_blank` | `FillBlank.tsx` | 代码填空 |
+| `predict_output` | `PredictOutput.tsx` | 预测代码输出 |
+| `spot_bug` | *(规划中)* | 找 Bug |
+| `write_code` | *(规划中)* | 从零编写代码 |
+| `drag_drop` | *(规划中)* | 拖拽代码块排序 |
+| `refactor` | *(规划中)* | 代码重构 |
+
+### 游戏化机制
+- **XP 与等级** — 答题得 XP，升级
+- **连胜** — 每日登录连胜，有奖励
+- **生命值** — 答错扣心，耗尽需等待/用宝石恢复
+- **宝石** — 货币，可买提示/商店道具
+- **段位** — 周排行榜段位（青铜 → 钻石）
+- **每日目标** — 用户自定义每日 XP 目标
+- **每日任务** — 每日 3 个任务，完成得额外奖励
+
+## 部署
+
+```bash
+# 构建前端
+npm run build
+
+# 部署到 EdgeOne Pages
+edgeone pages deploy dist
+```
+
+云函数随 `edgeone makers deploy` 自动部署，或在 EdgeOne 控制台手动部署。
+
+## 许可证
+
+MIT

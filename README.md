@@ -1,124 +1,162 @@
-# RAG Agent
+# CodeQuest
 
-A retrieval-augmented chat agent on EdgeOne Makers — answers questions over a local PDF knowledge base with citation-backed responses, streamed over SSE. Backend uses the OpenAI Agents SDK (Python).
-
-**Framework:** OpenAI Agents SDK · **Category:** File Processing <!-- TODO: confirm --> · **Language:** Python
-
-[![Deploy to EdgeOne Makers](https://cdnstatic.tencentcs.com/edgeone/pages/deploy.svg)](https://edgeone.ai/makers/new?template=rag-agent&from=within&fromAgent=1&agentLang=python)
-
-<!-- ![preview](./assets/preview.png)  TODO: confirm -->
+A gamified coding learning platform — interactive lessons, daily missions, and progress tracking for Python & JavaScript. Built with React + Vite + TypeScript, backed by EdgeOne cloud functions (Python).
 
 ## Overview
 
-A working enterprise-style RAG template: drop PDFs into `public/prepare-rag/files/`, run one script, and the agent answers grounded questions with page-level citations. The retrieval layer is a small filesystem-backed loader — no vector DB, no extra service to operate — so the template stays readable. Replace the loader with your own retrieval and the rest of the pipeline keeps working.
+CodeQuest helps beginners learn programming through interactive, bite-sized lessons with gamification:
 
-- **Citation-backed answers** — every claim links back to a specific document + page via `search_document` and `fetch_pages` tools.
-- **Streaming + tool visibility** — the UI surfaces `tool-input-available` / `tool-output-available` events so users see which sources the agent reads, in real time.
-- **Filesystem knowledge base** — `prepare_rag_data.py` extracts PDFs into `agents/_data/{docId}/pages/{n}.txt`; `_loader.py` reads them at request time, path-traversal-safe.
-- **Sticky session memory** — `context.store.openai_session(conversation_id)` keeps multi-turn context within a conversation; the stateless `/history` cloud function rehydrates the chat after a refresh.
-- **Honest stop** — `/stop` calls `context.utils.abort_active_run()` to interrupt the LLM call mid-stream.
+- **Interactive Lessons** — Multiple choice, fill-in-the-blank, predict output, spot the bug, write code, and drag-drop questions
+- **Two Learning Tracks** — Python and JavaScript, each with structured learning paths
+- **Gamified Progression** — XP, levels, streaks, hearts (lives), gems, leagues, and daily targets
+- **Daily Missions** — Daily coding challenges to build streaks
+- **Leaderboards** — Compete with other learners
+- **AI Chat Assistant** — Chat history per lesson for hints/explanations
+- **Onboarding Flow** — Personalized track selection, skill assessment, daily targets, and notifications
 
-## Environment Variables
+## Tech Stack
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `AI_GATEWAY_API_KEY` | Yes | Model gateway API key. Use your Makers Models API Key, or any OpenAI-compatible provider key. |
-| `AI_GATEWAY_BASE_URL` | Yes | Gateway base URL. For Makers Models, use `https://ai-gateway.edgeone.link/v1`. |
-| `AI_GATEWAY_MODEL` | No | Model ID. Defaults to `@makers/deepseek-v4-flash` (a free built-in model). |
-
-This template follows the OpenAI-compatible standard — point these at Makers Models or any compatible provider.
-
-### How to get `AI_GATEWAY_API_KEY`
-
-1. Open the [Makers Console](https://edgeone.ai/makers/new?s_url=https://console.tencentcloud.com/edgeone/makers).
-2. Sign in and enable Makers.
-3. Go to **Makers → Models → API Key** and create a key.
-4. Copy it into `AI_GATEWAY_API_KEY`.
-
-The built-in `@makers/deepseek-v4-flash` model is free with a usage cap and is suitable for prototyping. For production, bind your own paid provider (BYOK).
-
-## Local Development
-
-Prerequisites: Node.js ≥ 18, Python ≥ 3.10, and the EdgeOne CLI (`npm i -g edgeone`).
-
-```bash
-npm install
-pip install -r agents/requirements.txt
-pip install -r public/prepare-rag/requirements.txt
-cp .env.example .env       # then fill in AI_GATEWAY_API_KEY / AI_GATEWAY_BASE_URL
-
-# Drop PDFs into public/prepare-rag/files/, then build the knowledge base
-npm run prepare-rag
-
-edgeone makers dev
-```
-
-Local agent metrics & traces are exposed at `http://localhost:8080/agent-metrics`.
+| Layer | Stack |
+|-------|-------|
+| Frontend | React 18 + TypeScript + Vite |
+| State | Zustand |
+| Styling | CSS Variables + CSS Modules |
+| Backend | EdgeOne Cloud Functions (Python) |
+| Database | EdgeOne KV / D1 (via cloud functions) |
+| Deployment | EdgeOne Pages / Makers |
 
 ## Project Structure
 
-```text
-rag-agent/
-├── agents/                          # Stateful EdgeOne Makers Agent Functions (Python)
-│   ├── chat/index.py               # POST /chat — streaming RAG chat
-│   ├── chat/_stream.py             # SSE streaming utilities (private)
-│   ├── stop/index.py               # POST /stop — abort active agent run
-│   ├── rag-stats/index.py          # POST /rag-stats — knowledge base stats
-│   ├── _agent.py                   # RAG Agent definition (private)
-│   ├── _tools.py                   # search_document, fetch_pages tools (private)
-│   ├── _loader.py                  # Filesystem knowledge base reader (private)
-│   ├── _model.py                   # LLM configuration (private)
-│   ├── _data/                      # Generated knowledge base (gitignored)
-│   └── requirements.txt            # Python agent dependencies
-├── cloud-functions/                 # Stateless EdgeOne Makers Python cloud functions
-│   ├── history/index.py            # POST /history — load conversation messages
-│   └── _logger.py                  # Logger utility
-├── public/prepare-rag/              # PDF → structured text pipeline
-│   ├── prepare_rag_data.py
-│   ├── requirements.txt
-│   └── files/                      # Drop your source PDFs here
-├── src/                             # React + Vite frontend
-│   ├── App.tsx                     # Root component
-│   ├── api.ts                      # SSE stream client
+```
+CodeQuest/
+├── cloud-functions/              # EdgeOne Python cloud functions
+│   ├── user/                     # User init, get, streak
+│   ├── progress/                 # Progress updates
+│   ├── submissions/              # Code submissions
+│   ├── questions/                # Question fetching & verification
+│   ├── leaderboard/              # Leaderboard
+│   ├── chat-history/             # Chat history per lesson
+│   ├── history/                  # History
+│   └── seed/                     # Database seeding
+├── public/prepare-rag/           # RAG data prep (legacy/unused)
+├── src/
+│   ├── api.ts                    # Cloud function API client
+│   ├── App.tsx                   # App routing (selection → survey → learn)
+│   ├── main.tsx                  # Entry point
+│   ├── index.css                 # Global styles (CSS variables)
+│   ├── lib/
+│   │   ├── store.ts              # Zustand store (user, progress, UI state)
+│   │   ├── types.ts              # TypeScript types (UserData, Question, LessonNode)
+│   │   └── utils.ts              # Utilities
 │   └── components/
-│       ├── RagChat.tsx             # Chat UI with streaming + tool visibility
-│       ├── CitationCard.tsx        # Source citation display
-│       └── KnowledgeBaseSummary.tsx
+│       ├── ui/                   # Reusable UI (Button, Card, Modal, ProgressBar, Mascot, Confetti)
+│       ├── onboarding/           # Onboarding flow (SelectionScreen, SurveyFlow, steps)
+│       ├── learn/                # Learning pages (LearnPage, LearningPath, DailyMissions, Sidebar, StatusBar)
+│       └── questions/            # Question components (MCQ, FillBlank, PredictOutput, LessonPage)
+├── agents/                       # Legacy RAG agent (unused)
+├── edgeone.json                  # EdgeOne config
 ├── package.json
-├── edgeone.json                     # framework=openai-agents-sdk, agents.timeout=300, sandbox.timeout=300
-└── vite.config.ts
+├── tsconfig.json
+├── vite.config.ts
+└── README.md
 ```
 
-> Files prefixed with `_` are private modules — not exposed as public routes.
+## Getting Started
 
-## How It Works
+### Prerequisites
 
-`agents/` runs in **conversation mode**: requests carrying the same `Markers-Conversation-Id` HTTP header are sticky-routed to the same agent instance, sharing the same in-memory state and the same EdgeOne sandbox. That stickiness is what lets `/chat` (the SSE stream) and `/stop` (the abort) reach the same running task. `/stop` deliberately receives the conversation id in the request body — never in the header — so the cancel signal doesn't collide with the live SSE stream.
+- Node.js ≥ 18
+- Python ≥ 3.10 (for cloud functions)
+- EdgeOne CLI: `npm i -g edgeone`
 
-End-to-end:
+### Local Development
 
-1. **Build the knowledge base (offline)** — `prepare_rag_data.py` reads PDFs from `public/prepare-rag/files/` and writes `agents/_data/{docId}/meta.json` + `pages/{n}.txt` (plus an optional `structure.json` page-tree). `agents/_data/index.json` is the document manifest.
-2. **Request entry** — `POST /chat` (handled by `agents/chat/index.py`) pulls history via `context.store.openai_session(conversation_id)` and starts an OpenAI Agents SDK run for the `_agent.py` agent definition.
-3. **LLM ↔ tools loop** — the agent has access to two tools defined in `_tools.py`:
-   - `search_document(query)` — retrieves candidate pages from the local knowledge base
-   - `fetch_pages(doc_id, pages)` — reads exact page text for citation
-   The agent runs up to 6 turns; `_loader.py` enforces path-traversal-safe filesystem reads under `Path(__file__).parent / "_data"`.
-4. **Streaming** — the handler emits SSE events `start`, `text-start`, `text-delta`, `text-end`, `tool-input-available`, `tool-output-available`, `finish`, `error`. The UI's `useAgentStream` reducer turns those into chat bubbles + citation cards.
-5. **Stats / history / stop** — `POST /rag-stats` (in `agents/`) returns knowledge-base metadata; `POST /history` (in `cloud-functions/`) reads `context.agent.store.get_messages()` to rehydrate after a refresh; `POST /stop` cancels the live run.
+```bash
+# Install frontend deps
+npm install
 
-Sandbox credentials are injected by the runtime — no local sandbox config is needed. Per `edgeone.json`, both the agent and its sandbox have a 300-second timeout (`agents.timeout`, `agents.sandbox.timeout`).
+# Install cloud function deps
+pip install -r cloud-functions/requirements.txt  # if exists, or per-function
 
-The bundled sample knowledge base includes:
+# Copy env and configure
+cp .env.example .env
+# Fill in EdgeOne credentials
 
-- **EdgeOne-Pages-Platform-Guide.pdf** — platform architecture, `context.store`, SSE streaming, deployment.
-- **Building-RAG-Applications.pdf** — RAG patterns, retrieval strategies, citations, evaluation.
+# Start dev server (frontend + cloud functions)
+edgeone pages dev
+```
 
-## Resources
+Or run frontend only:
 
-- [EdgeOne Makers Agents — Documentation](https://pages.edgeone.ai/document/agents)
-- [EdgeOne Makers — Quick Start](https://pages.edgeone.ai/document/agents-quick-start)
-- [Makers Models](https://pages.edgeone.ai/document/models)
+```bash
+npm run dev
+```
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `EDGEONE_API_TOKEN` | Yes | EdgeOne API token for cloud function deployment |
+| `EDGEONE_PROJECT_NAME` | Yes | EdgeOne project name |
+
+## Cloud Functions
+
+Each folder under `cloud-functions/` is a separate EdgeOne Function (Python):
+
+| Function | Route | Purpose |
+|----------|-------|---------|
+| `user/init` | POST `/user/init` | Initialize new user |
+| `user/get` | GET `/user/get` | Get user profile |
+| `user/streak` | POST `/user/streak` | Update streak |
+| `progress/update` | POST `/progress/update` | Update lesson progress |
+| `submissions/create` | POST `/submissions/create` | Save code submission |
+| `questions/get` | GET `/questions/get` | Fetch questions for lesson |
+| `questions/verify` | POST `/questions/verify` | Verify answer |
+| `leaderboard/get` | GET `/leaderboard/get` | Get leaderboard |
+| `chat-history` | POST `/chat-history` | Get/save chat history |
+| `seed/init` | POST `/seed/init` | Seed database |
+| `seed/get` | GET `/seed/get` | Get seed data |
+
+## Features Overview
+
+### Learning Tracks
+- **Python** — Variables, loops, functions, data structures, OOP, modules
+- **JavaScript** — Variables, functions, DOM, async, ES6+, frameworks basics
+
+### Question Types
+| Type | Component | Description |
+|------|-----------|-------------|
+| `mcq` | `MultipleChoice.tsx` | Single/multiple choice |
+| `fill_blank` | `FillBlank.tsx` | Fill in code blanks |
+| `predict_output` | `PredictOutput.tsx` | Predict code output |
+| `spot_bug` | *(planned)* | Find the bug |
+| `write_code` | *(planned)* | Write code from scratch |
+| `drag_drop` | *(planned)* | Drag & drop code blocks |
+| `refactor` | *(planned)* | Refactor code |
+
+### Gamification
+- **XP & Levels** — Earn XP per question, level up
+- **Streaks** — Daily login streaks with rewards
+- **Hearts** — Lives system (lose on wrong answer)
+- **Gems** — Currency for hints/shop
+- **Leagues** — Weekly leaderboards (Bronze → Diamond)
+- **Daily Target** — User-set daily XP goal
+- **Daily Missions** — 3 daily tasks for bonus rewards
+
+## Deployment
+
+```bash
+# Build frontend
+npm run build
+
+# Deploy to EdgeOne Pages
+edgeone pages deploy dist
+```
+
+Cloud functions deploy automatically with `edgeone makers deploy` or via the EdgeOne dashboard.
+
+## Script / Makers console.
 
 ## License
 
-MIT.
+MIT

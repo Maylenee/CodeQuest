@@ -1,0 +1,225 @@
+/* ── Path Container ── */
+.skillpath {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 0 60px;
+  position: relative;
+}
+
+/* ── Node Row ── */
+.skillpath-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin-bottom: 16px;
+  z-index: 2;
+}
+.skillpath-node:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Wave positions ── */
+.skillpath-node--pos0 { transform: translateX(20px); }
+.skillpath-node--pos1 { transform: translateX(-35px); }
+.skillpath-node--pos2 { transform: translateX(-55px); }
+.skillpath-node--pos3 { transform: translateX(-35px); }
+.skillpath-node--pos4 { transform: translateX(20px); }
+
+/* ── Clickable area ── */
+.skillpath-clickable {
+  cursor: pointer;
+}
+.skillpath-clickable[role="button"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+/* ── Icon wrap base ── */
+.skillpath-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  position: relative;
+}
+
+/* ── Active (100px container, 68px button, ring) ── */
+.skillpath-icon-wrap--active {
+  width: 100px;
+  height: 100px;
+}
+
+.skillpath-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+.skillpath-active-btn {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: #58cc02;
+  border: none;
+  box-shadow: 0 6px 0 #3d8f00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s ease;
+}
+.skillpath-active-btn:hover {
+  transform: scale(1.03);
+}
+.skillpath-active-btn img {
+  width: 32px;
+  height: 32px;
+  display: block;
+}
+
+/* ── Locked / Milestone (90px) ── */
+.skillpath-icon-wrap--locked,
+.skillpath-icon-wrap--milestone {
+  width: 90px;
+  height: 90px;
+  background: #3d4a56;
+  box-shadow: 0 6px 0 #2a3540;
+}
+.skillpath-locked-icon {
+  width: 32px;
+  height: 32px;
+  display: block;
+  filter: brightness(0.7);
+}
+.skillpath-icon-wrap--milestone svg {
+  width: 32px;
+  height: 36px;
+  display: block;
+  filter: brightness(0.7);
+}
+
+/* ── Chest (110px) ── */
+.skillpath-icon-wrap--chest {
+  width: 110px;
+  height: 110px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transition: transform 0.15s ease;
+}
+.skillpath-icon-wrap--chest:hover {
+  transform: scale(1.03);
+}
+.skillpath-icon-wrap--chest img {
+  width: 82px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* ── MULAI Badge ── */
+.skillpath-badge-outer {
+  margin-bottom: 12px;
+}
+.skillpath-badge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.skillpath-badge-inner {
+  background: #1a2530;
+  border: 2px solid var(--color-primary);
+  border-radius: 8px;
+  padding: 5px 16px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  line-height: 1;
+}
+.skillpath-badge-arrow {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid var(--color-primary);
+  margin-top: -1px;
+}
+
+/* ── Capybara Mascot ── */
+.skillpath-capybara {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.skillpath-capybara--right {
+  right: -90px;
+  top: 10px;
+}
+.skillpath-capybara-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0 4px 0 #1a2530);
+}
+.skillpath-capybara-body svg {
+  width: 44px;
+  height: 44px;
+}
+.skillpath-capybara-base {
+  width: 30px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2a3540;
+  box-shadow: 0 4px 0 #1a2530;
+  margin-top: -4px;
+}
+
+/* ── Back Button ── */
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 800;
+  border-radius: 12px;
+  transition: all 0.1s;
+  user-select: none;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-bottom: 4px solid #3a8a01;
+  padding: 12px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+}
+.btn-back:hover {
+  background: var(--color-primary-hover);
+}
+.btn-back:active {
+  translate: 0 2px;
+  border-bottom-width: 2px;
+}
+.btn-back:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn-back:disabled:active {
+  translate: 0;
+  border-bottom-width: 4px;
+}

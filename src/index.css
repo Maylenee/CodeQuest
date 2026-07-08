@@ -1,130 +1,157 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap');
+@import "tailwindcss";
 
-:root {
-  /* ── Backgrounds ── */
-  --bg-primary: #0f1117;
-  --bg-secondary: #1a1d27;
-  --bg-tertiary: #242832;
-  --bg-card: #1e222c;
-
-  /* ── Text ── */
-  --text-primary: #e8e6e3;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
-
-  /* ── Accent (warm amber) ── */
-  --accent: #d4a853;
-  --accent-dim: #d4a85320;
-  --accent-hover: #e0b865;
-  --accent-glow: rgba(212, 168, 83, 0.12);
-  --accent-subtle: rgba(212, 168, 83, 0.07);
-
-  /* ── Borders ── */
-  --border: #2a2f3a;
-  --border-accent: #d4a85340;
-
-  /* ── Semantic ── */
-  --error: #ef4444;
-  --success: #10b981;
-
-  /* ── Typography ── */
-  --font-heading: 'Instrument Serif', Georgia, serif;
-  --font-body: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'IBM Plex Mono', 'Fira Code', monospace;
-
-  /* ── Radii ── */
-  --radius-lg: 16px;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-xs: 6px;
-
-  /* ── Shadows ── */
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3), 0 8px 32px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-focus: 0 0 0 3px var(--accent-glow);
-
-  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+@theme {
+  --color-bg-primary: #131f24;
+  --color-bg-secondary: #0f1720;
+  --color-bg-card: #1f2c33;
+  --color-bg-card-hover: #26353d;
+  --color-border: #37464f;
+  --color-border-light: #4a5a65;
+  --color-primary: #58cc02;
+  --color-primary-hover: #4ab801;
+  --color-primary-light: rgba(88, 204, 2, 0.15);
+  --color-secondary: #1cb0f6;
+  --color-secondary-light: rgba(28, 176, 246, 0.15);
+  --color-accent-yellow: #ffc800;
+  --color-accent-red: #ff4b4b;
+  --color-accent-purple: #ce82ff;
+  --color-accent-orange: #ff9600;
+  --color-text-primary: #f0f4f8;
+  --color-text-secondary: #a0b3c0;
+  --color-text-muted: #6a7f8c;
+  --color-success: #58cc02;
+  --color-error: #ff4b4b;
+  --color-warning: #ffc800;
 }
 
-*, *::before, *::after {
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
 }
 
 body {
-  font-family: var(--font-body);
-  background-color: var(--bg-primary);
-  min-height: 100vh;
-  min-height: 100dvh;
-  color: var(--text-primary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0;
-  line-height: 1.6;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: "Nunito", "Segoe UI", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#root {
-  width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-::selection {
-  background: var(--accent-dim);
-  color: var(--accent);
-}
-
 ::-webkit-scrollbar {
   width: 6px;
-  height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-bg-primary);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: var(--color-border);
   border-radius: 3px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+/* Custom component classes used by components */
+.card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+}
+.card-hover:hover {
+  border-color: var(--color-border-light);
+  transform: scale(1.02);
+  background-color: var(--color-bg-card-hover);
+}
+.card-selected {
+  border-color: var(--color-primary) !important;
+  background-color: var(--color-primary-light) !important;
+}
+.progress-bar {
+  height: 0.75rem;
+  background-color: var(--color-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+/* ── Animations ── */
+.mascot-idle {
+  animation: float 3s ease-in-out infinite;
+}
+.mascot-bob {
+  animation: bob 2.5s ease-in-out infinite;
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease;
+}
+.animate-slide-up {
+  animation: slideUp 0.4s ease;
+}
+.animate-bounce-in {
+  animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.animate-slide-in-right {
+  animation: slideInRight 0.25s ease-out;
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.2s ease-out;
+}
+.animate-progress {
+  animation: fillBar 0.8s ease-out;
+}
+.animate-glow {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confettiFall 2s ease-out forwards;
 }
 
-button {
-  font-family: inherit;
-  cursor: pointer;
-  border: none;
-  background: none;
-  color: inherit;
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
-
-input, textarea {
-  font-family: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-  outline: none;
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-4px) rotate(-0.5deg); }
+  75% { transform: translateY(-2px) rotate(0.5deg); }
 }
-
-a {
-  color: var(--accent);
-  text-decoration: none;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-
-a:hover {
-  text-decoration: underline;
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes bounceIn {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fillBar {
+  from { width: 0; }
+}
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(88, 204, 2, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(88, 204, 2, 0.6); }
+}
+@keyframes confettiFall {
+  0% { opacity: 1; transform: translateY(0) rotate(0); }
+  100% { opacity: 0; transform: translateY(200px) rotate(720deg); }
 }
