@@ -1,4 +1,5 @@
 import { Card } from "../ui/Card";
+import "./Questions.css";
 
 interface MultipleChoiceProps {
   options: string[];
@@ -9,19 +10,19 @@ interface MultipleChoiceProps {
 
 export function MultipleChoice({ options, selected, onSelect, disabled }: MultipleChoiceProps) {
   return (
-    <div className="grid grid-cols-1 gap-2">
+    <div className="qc-grid">
       {options.map((opt, i) => (
         <Card
           key={i}
           hover={!disabled}
           selected={selected === i}
           onClick={() => !disabled && onSelect(i)}
-          className="flex items-center gap-3 p-4"
+          className="qc-option"
         >
-          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${selected === i ? "border-[var(--color-primary)] bg-[var(--color-primary)]" : "border-[var(--color-border)]"}`}>
-            {selected === i && <div className="w-2 h-2 rounded-full bg-white" />}
+          <div className={`qc-radio ${selected === i ? "qc-radio--selected" : ""}`}>
+            {selected === i && <div className="qc-radio-dot" />}
           </div>
-          <span className="text-sm font-semibold">{opt}</span>
+          <span className="qc-option-text">{opt}</span>
         </Card>
       ))}
     </div>

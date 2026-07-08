@@ -60,6 +60,13 @@ DATA = {
                   "prompt": "Apa output dari kode Python berikut?",
                   "content": {"code": "print(\"Hello, Python!\")", "options": ["Hello, Python!", "hello, python!", "Error", "Tidak ada output"], "correctAnswer": 0, "hints": ["Fungsi print() akan mencetak argumen yang diberikan ke console"]},
                   "xpReward": 10
+                },
+                {
+                  "id": "q3b",
+                  "type": "spot_bug",
+                  "prompt": "Baris mana yang mengandung bug pada kode berikut?",
+                  "content": {"code": "print(\"Halo\")\nprint(\"Dunia\"\nprint(\"Python\")", "bugLines": [1], "hints": ["Perhatikan tanda kurung yang tidak berpasangan"]},
+                  "xpReward": 15
                 }
               ]
             },
@@ -88,6 +95,20 @@ DATA = {
                   "prompt": "Manakah dari berikut ini yang BUKAN termasuk tipe data di Python?",
                   "content": {"options": ["int", "float", "char", "bool"], "correctAnswer": 2, "hints": ["Python tidak punya tipe data char terpisah"]},
                   "xpReward": 10
+                },
+                {
+                  "id": "q6b",
+                  "type": "write_code",
+                  "prompt": "Buat variabel dengan nama `nama_lengkap` dan isi dengan nilai \"CodeQuest\".",
+                  "content": {"starterCode": "# Tulis kode di bawah ini\n", "expectedOutput": "nama_lengkap = \"CodeQuest\"", "hints": ["Gunakan tanda = untuk assignment", "String harus diapit tanda kutip"]},
+                  "xpReward": 15
+                },
+                {
+                  "id": "q6c",
+                  "type": "drag_drop",
+                  "prompt": "Susunlah kode berikut agar menjadi program yang benar:",
+                  "content": {"blocks": ["print(hasil)", "hasil = a + b", "a = 5", "b = 3"], "correctOrder": [2, 3, 1, 0], "hints": ["Urutkan dari deklarasi variabel, operasi, lalu output"]},
+                  "xpReward": 15
                 }
               ]
             },
@@ -109,6 +130,13 @@ DATA = {
                   "prompt": "Apa output dari kode berikut?",
                   "content": {"code": "nama = \"Python\"\nprint(len(nama))", "options": ["5", "6", "7", "Error"], "correctAnswer": 1, "hints": ["len() mengembalikan panjang string, 'Python' memiliki 6 karakter"]},
                   "xpReward": 10
+                },
+                {
+                  "id": "q8b",
+                  "type": "refactor",
+                  "prompt": "Refaktor kode berikut agar lebih efisien dengan metode string:",
+                  "content": {"codeBefore": "teks = \"python\"\nhasil = teks.upper()\nprint(hasil)", "hints": ["Kamu bisa menggabungkan method chaining"], "expectedSolution": ""},
+                  "xpReward": 15
                 }
               ]
             },

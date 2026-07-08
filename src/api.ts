@@ -36,6 +36,17 @@ export const userGet = (id: string) => cf(`/user/get${qs({ id })}`);
 export const userStreak = (id: string) =>
   cf("/user/streak", { method: "POST", body: JSON.stringify({ id }) });
 
+export const userUpdate = (data: {
+  id: string;
+  name?: string;
+  email?: string;
+  selectedTrack?: string;
+  dailyTarget?: number;
+  gems?: number;
+  xp?: number;
+  hearts?: number;
+}) => cf("/user/update", { method: "POST", body: JSON.stringify(data) });
+
 // Progress
 export const progressUpdate = (data: {
   userId: string;
@@ -58,13 +69,23 @@ export const submissionCreate = (data: {
 export const leaderboardGet = () => cf("/leaderboard/get");
 
 // Questions
-export const questionsGet = (lessonId: string) =>
-  cf(`/questions/get${qs({ lessonId })}`);
+export const questionsGet = async (lessonId: string) => {
+  try {
+    return await cf(`/questions/get${qs({ lessonId })}`);
+  } catch {
+    const { QUESTIONS_FALLBACK } = await import("./lib/questionsData");
+    const fallback = (QUESTIONS_FALLBACK as any)[lessonId];
+    if (fallback) return fallback;
+    throw new Error("No questions available");
+  }
+};
 
 export const questionVerify = (data: { questionId: string; answer: any }) =>
   cf("/questions/verify", { method: "POST", body: JSON.stringify(data) });
 
-// Chat history
+// Reference
+export const referenceGet = (lessonId?: string) =>
+  cf(`/reference/get${lessonId ? qs({ lessonId }) : ""}`);
 export const chatHistoryGet = (userId: string, lessonId: string) =>
   cf("/chat-history", {
     method: "POST",

@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
-import { Mascot } from "../ui/Mascot";
-import { Button } from "../ui/Button";
 import { ProgressBar } from "../ui/ProgressBar";
 import { Confetti } from "../ui/Confetti";
 import { MultipleChoice } from "./MultipleChoice";
 import { FillBlank } from "./FillBlank";
 import { PredictOutput } from "./PredictOutput";
+import { SpotBug } from "./SpotBug";
+import { WriteCode } from "./WriteCode";
+import { DragDrop } from "./DragDrop";
+import { Refactor } from "./Refactor";
 import { useGameStore } from "../../lib/store";
 import { questionsGet, questionVerify, progressUpdate, submissionCreate, userStreak } from "../../api";
-import { ArrowLeft, Lightbulb, Heart } from "lucide-react";
+import { Lightbulb, Heart, X } from "lucide-react";
 import type { Question } from "../../lib/types";
-import "../learn/LearningPath.css";
+import "./Questions.css";
 
 interface LessonPageProps {
   lessonId: string;
@@ -85,6 +87,13 @@ export function LessonPage({ lessonId, onBack }: LessonPageProps) {
       } else if (question.type === "fill_blank") {
         const blanks = (content as any).blanks || [];
         isCorrect = blanks.every((b: any) => answer[b.id]?.trim() === b.answer);
+      } else if (question.type === "spot_bug") {
+        const bugLines = (content as any).bugLines || [];
+        const selected = (answer as number[]) || [];
+        isCorrect = bugLines.length === selected.length && bugLines.every((b: number) => selected.includes(b));
+      } else if (question.type === "drag_drop") {
+        const order = (answer as number[]) || [];
+        isCorrect = order.every((idx: number, pos: number) => idx === pos);
       }
       setCorrect(isCorrect);
       setShowResult(true);
@@ -102,25 +111,36 @@ export function LessonPage({ lessonId, onBack }: LessonPageProps) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 2500);
       const uid = localStorage.getItem("codequest_userId") || "user-default";
-      await progressUpdate({ userId: uid, lessonId, status: "completed", score: 30, xpReward: 20 });
+      try {
+        await progressUpdate({ userId: uid, lessonId, status: "completed", score: 30, xpReward: 20 });
+      } catch {}
+      const stored = JSON.parse(localStorage.getItem(`codequest_progress_${uid}`) || "[]");
+      if (!stored.find((p: any) => p.lessonId === lessonId)) {
+        stored.push({ lessonId, status: "completed" });
+        localStorage.setItem(`codequest_progress_${uid}`, JSON.stringify(stored));
+      }
     } else {
       setCurrentQ((p) => p + 1);
     }
   };
 
   if (loading) {
-    return <div className="text-center py-20 text-[var(--color-text-muted)]">Memuat soal...</div>;
+    return <div className="lp-loading">Memuat soal...</div>;
   }
 
   if (lessonComplete) {
     return (
-      <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center">
-        <Confetti active={true} />
-        <div className="text-center max-w-md">
-          <Mascot size="lg" expression="celebrate" className="mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Pelajaran Selesai! 🎉</h1>
-          <p className="text-[var(--color-text-muted)] mb-2">Kamu dapat <span className="text-[var(--color-primary)] font-bold">{xp} XP</span></p>
-          <button onClick={onBack} className="btn-back mt-4">KEMBALI KE LEARNING PATH</button>
+      <div className="lesson-modal-overlay">
+        <div className="lesson-modal-backdrop" />
+        <div className="lesson-modal-content">
+          <div className="lp-complete">
+            <Confetti active={true} />
+            <div className="lp-complete-inner">
+              <h1 className="lp-complete-title">Pelajaran Selesai! 🎉</h1>
+              <p className="lp-complete-desc">Kamu dapat <span className="lp-complete-xp">{xp} XP</span></p>
+              <button onClick={onBack} className="btn-back lp-complete-btn">KEMBALI KE LEARNING PATH</button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -128,8 +148,8 @@ export function LessonPage({ lessonId, onBack }: LessonPageProps) {
 
   if (!question) {
     return (
-      <div className="text-center py-20">
-        <p className="text-[var(--color-text-muted)] mb-4">Tidak ada soal untuk pelajaran ini</p>
+      <div className="lp-empty">
+        <p className="lp-empty-text">Tidak ada soal untuk pelajaran ini</p>
         <button onClick={onBack} className="btn-back">KEMBALI</button>
       </div>
     );
@@ -142,26 +162,30 @@ export function LessonPage({ lessonId, onBack }: LessonPageProps) {
   const progress = ((currentQ + (showResult ? 1 : 0)) / total) * 100;
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] flex flex-col">
-      <Confetti active={showConfetti} />
-      <div className="px-4 py-3 flex items-center gap-4 border-b border-[var(--color-border)]">
-        <button onClick={onBack} className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <ProgressBar value={progress} max={100} className="flex-1" />
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-[var(--color-primary)] font-bold">{xp}</span>
-          <span className="text-[var(--color-text-muted)]">XP</span>
+    <div className="lesson-modal-overlay">
+      <div className="lesson-modal-backdrop" />
+      <div className="lesson-modal-content">
+        <Confetti active={showConfetti} />
+        <div className="lp-body">
+        {/* Compact top bar: X, progress, XP, hearts */}
+        <div className="lp-top-bar">
+          <button onClick={onBack} className="lp-close-btn" aria-label="Close">
+            <X className="w-5 h-5" />
+          </button>
+          <ProgressBar value={progress} max={100} className="lp-progress" />
+          <div className="lp-stat">
+            <span className="lp-stat--xp">{xp}</span>
+            <span className="lp-stat-label">XP</span>
+          </div>
+          <div className="lp-stat--hearts">
+            <Heart className="lp-heart-icon" />
+            <span className="lp-heart-value">{hearts}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1 text-sm">
-          <Heart className="w-4 h-4 text-[var(--color-accent-red)]" />
-          <span className="font-bold">{hearts}</span>
-        </div>
-      </div>
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 max-w-2xl mx-auto w-full">
-        <p className="text-xs text-[var(--color-text-muted)] font-medium mb-4">Soal {currentQ + 1} dari {total}</p>
-        <h2 className="text-lg font-bold text-center mb-6">{question.prompt}</h2>
-        <div className="w-full mb-4">
+
+        <p className="lp-question-num">Soal {currentQ + 1} dari {total}</p>
+        <h2 className="lp-question-title">{question.prompt}</h2>
+        <div className="lp-question-area">
           {question.type === "mcq" && (
             <MultipleChoice
               options={content.options || []}
@@ -188,38 +212,73 @@ export function LessonPage({ lessonId, onBack }: LessonPageProps) {
               disabled={showResult}
             />
           )}
+          {question.type === "spot_bug" && (
+            <SpotBug
+              code={content.code || ""}
+              bugLines={content.bugLines || []}
+              selectedLines={currentAnswer || []}
+              onSelect={(lines) => handleAnswer(lines)}
+              disabled={showResult}
+            />
+          )}
+          {question.type === "write_code" && (
+            <WriteCode
+              starterCode={content.starterCode}
+              value={currentAnswer || ""}
+              onChange={(code) => handleAnswer(code)}
+              disabled={showResult}
+            />
+          )}
+          {question.type === "drag_drop" && (
+            <DragDrop
+              codeLines={content.codeLines || []}
+              order={currentAnswer || (content.codeLines || []).map((_: string, i: number) => i)}
+              onChange={(order) => handleAnswer(order)}
+              disabled={showResult}
+            />
+          )}
+          {question.type === "refactor" && (
+            <Refactor
+              code={content.code || ""}
+              value={currentAnswer || ""}
+              onChange={(code) => handleAnswer(code)}
+              disabled={showResult}
+            />
+          )}
         </div>
         {!showResult && (
-          <button onClick={() => setShowHint(!showHint)} className="flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent-yellow)] transition-colors mb-4">
+          <button onClick={() => setShowHint(!showHint)} className="lp-hint-btn">
             <Lightbulb className="w-4 h-4" />
             {showHint ? "Sembunyikan hint" : "Butuh hint?"}
           </button>
         )}
         {showHint && content.hints?.[0] && (
-          <div className="w-full bg-[var(--color-accent-yellow)]/10 border border-[var(--color-accent-yellow)]/30 rounded-xl p-4 mb-4 animate-fade-in">
-            <p className="text-sm text-[var(--color-accent-yellow)]">💡 {content.hints[0]}</p>
+          <div className="lp-hint-box">
+            <p className="lp-hint-text">💡 {content.hints[0]}</p>
           </div>
         )}
         {showResult && (
-          <div className={`w-full rounded-xl p-4 mb-4 animate-slide-up ${correct ? "bg-[var(--color-primary-light)] border border-[var(--color-primary)]" : "bg-[var(--color-accent-red)]/10 border border-[var(--color-accent-red)]"}`}>
-            <p className={`font-bold text-center ${correct ? "text-[var(--color-primary)]" : "text-[var(--color-accent-red)]"}`}>
+          <div className={`lp-result-box ${correct ? "lp-result-box--correct" : "lp-result-box--wrong"}`}>
+            <p className={`lp-result-text ${correct ? "lp-result-text--correct" : "lp-result-text--wrong"}`}>
               {correct ? "✅ Benar!" : "❌ Salah, coba lagi!"}
             </p>
-            {correct && <p className="text-xs text-center text-[var(--color-text-muted)] mt-1">+{question.xpReward || 10} XP</p>}
+            {correct && <p className="lp-result-xp">+{question.xpReward || 10} XP</p>}
           </div>
         )}
-        <div className="flex gap-3 w-full">
+        <div className="lp-btn-row">
           {!showResult ? (
-            <Button fullWidth disabled={!hasAnswer} onClick={handleCheck}>CEK JAWABAN</Button>
+            <button className="lp-btn-flat" style={{ width: "100%" }} disabled={!hasAnswer} onClick={handleCheck}>CEK JAWABAN</button>
           ) : correct ? (
-            <Button fullWidth onClick={handleNext}>{isLast ? "SELESAIKAN" : "LANJUTKAN"}</Button>
+            <button className="lp-btn-flat" style={{ width: "100%" }} onClick={handleNext}>{isLast ? "SELESAIKAN" : "LANJUTKAN"}</button>
           ) : (
-            <Button fullWidth variant="secondary" onClick={() => { setShowResult(false); setAnswers((prev) => { const n = { ...prev }; delete n[question.id]; return n; }); }}>
+            <button className="lp-btn-flat lp-btn-flat--secondary" style={{ width: "100%" }} onClick={() => { setShowResult(false); setAnswers((prev) => { const n = { ...prev }; delete n[question.id]; return n; }); }}>
               COBA LAGI
-            </Button>
+            </button>
           )}
+        </div>
         </div>
       </div>
     </div>
   );
 }
+

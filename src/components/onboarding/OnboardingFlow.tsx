@@ -10,6 +10,7 @@ import { StepDailyTarget } from "./StepDailyTarget";
 import { StepNotification } from "./StepNotification";
 import { StepStartingPoint } from "./StepStartingPoint";
 import { StepConfirmation } from "./StepConfirmation";
+import "./Onboarding.css";
 
 const TOTAL_STEPS = 9;
 
@@ -41,24 +42,24 @@ export function OnboardingFlow({ onComplete }: { onComplete: () => void }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] flex flex-col">
-      <div className="px-6 pt-4 pb-2">
+    <div className="onboard-page">
+      <div className="onboard-progress">
         <ProgressBar value={step + 1} max={TOTAL_STEPS} />
       </div>
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 max-w-2xl mx-auto w-full">
-        <div className="flex items-start gap-4 mb-6 w-full">
+      <div className="onboard-body">
+        <div className="onboard-chat">
           <Mascot
             size="md"
             expression={step === 4 ? "happy" : step === 8 ? "celebrate" : "normal"}
           />
-          <div className="flex-1 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-4 relative">
-            <div className="absolute left-[-8px] top-4 w-4 h-4 bg-[var(--color-bg-card)] border-l border-b border-[var(--color-border)] rotate-45" />
-            <p className="text-sm text-[var(--color-text-secondary)]">
+          <div className="onboard-bubble">
+            <div className="onboard-bubble-arrow" />
+            <p className="onboard-bubble-text">
               {stepMessages[step]}
             </p>
           </div>
         </div>
-        <div className="w-full animate-fade-in" key={step}>
+        <div className="onboard-content animate-fade-in" key={step}>
           {steps[step]}
         </div>
       </div>

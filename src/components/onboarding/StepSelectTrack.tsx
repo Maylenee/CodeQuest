@@ -1,7 +1,7 @@
 import { useOnboardingStore } from "../../lib/store";
-import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { Code, Globe, FileJson, Brain, Database, GitBranch, Layout, Smartphone } from "lucide-react";
+import "./Onboarding.css";
 
 const tracks = [
   { id: "python", name: "Python Dasar", icon: Code, color: "#58CC02", students: "12.4rb" },
@@ -19,33 +19,26 @@ export function StepSelectTrack() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-center mb-2">Pilih Track Belajar</h2>
-      <p className="text-sm text-[var(--color-text-muted)] text-center mb-6">
-        Pilih satu track untuk memulai perjalanan coding-mu
-      </p>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <h2 className="step-title">Pilih Track Belajar</h2>
+      <p className="step-sub">Pilih satu track untuk memulai perjalanan coding-mu</p>
+      <div className="sel-grid sel-grid--4col">
         {tracks.map((track) => {
           const Icon = track.icon;
+          const sel = selectedTrack === track.id;
           return (
-            <Card
+            <button
               key={track.id}
-              hover
-              selected={selectedTrack === track.id}
               onClick={() => setSelectedTrack(track.id)}
-              className="flex flex-col items-center text-center p-4"
+              className={`sel-card sel-card--center ${sel ? "sel-card--selected" : ""}`}
             >
-              <Icon className="w-8 h-8 mb-2" style={{ color: track.color }} />
-              <span className="text-sm font-bold">{track.name}</span>
-              <span className="text-xs text-[var(--color-text-muted)] mt-1">
-                {track.students} siswa
-              </span>
-            </Card>
+              <Icon className="sel-card-icon" style={{ color: track.color }} />
+              <span className="sel-card-label">{track.name}</span>
+              <span className="text-xs text-[var(--color-text-muted)] mt-1">{track.students} siswa</span>
+            </button>
           );
         })}
       </div>
-      <Button fullWidth disabled={!selectedTrack} onClick={nextStep}>
-        LANJUTKAN
-      </Button>
+      <Button fullWidth disabled={!selectedTrack} onClick={nextStep}>LANJUTKAN</Button>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useOnboardingStore } from "../../lib/store";
 import { Button } from "../ui/Button";
-import { Monitor, Brain, Flame, CheckCircle2 } from "lucide-react";
+import { Monitor, Brain, Flame } from "lucide-react";
+import "./Onboarding.css";
 
 const points = [
   {
@@ -28,23 +29,21 @@ export function StepMotivationalSlide() {
 
   return (
     <div className="text-center">
-      <h2 className="text-xl font-bold mb-2">Ini yang bisa kamu capai</h2>
-      <p className="text-sm text-[var(--color-text-muted)] mb-6">
-        Dengan konsisten belajar, kamu akan...
-      </p>
-      <div className="flex flex-col gap-4 mb-8">
+      <h2 className="step-title">Ini yang bisa kamu capai</h2>
+      <p className="step-sub">Dengan konsisten belajar, kamu akan...</p>
+      <div className="sel-grid sel-grid--single" style={{ marginBottom: 32 }}>
         {points.map((p, i) => {
           const Icon = p.icon;
           return (
-            <div key={i} className="flex items-start gap-4 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl p-4 text-left">
-              <div className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${p.color}20` }}>
-                <Icon className="w-5 h-5" style={{ color: p.color }} />
+            <div key={i} className="highlight-card">
+              <div className="highlight-icon" style={{ backgroundColor: `${p.color}20` }}>
+                <Icon style={{ color: p.color }} />
               </div>
-              <div>
-                <h3 className="font-bold text-sm">{p.title}</h3>
-                <p className="text-xs text-[var(--color-text-muted)]">{p.desc}</p>
+              <div className="highlight-info">
+                <h3 className="highlight-title">{p.title}</h3>
+                <p className="highlight-desc">{p.desc}</p>
               </div>
-              <CheckCircle2 className="w-5 h-5 text-[var(--color-primary)] ml-auto shrink-0" />
+              <span className="highlight-check">✓</span>
             </div>
           );
         })}

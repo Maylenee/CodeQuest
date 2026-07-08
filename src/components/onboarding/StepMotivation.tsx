@@ -1,7 +1,7 @@
 import { useOnboardingStore } from "../../lib/store";
-import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { Briefcase, GraduationCap, HeartHandshake, Laptop, Trophy, MoreHorizontal } from "lucide-react";
+import "./Onboarding.css";
 
 const motivations = [
   { id: "karier", label: "Karier/Pekerjaan", icon: Briefcase },
@@ -17,28 +17,25 @@ export function StepMotivation() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-center mb-6">Kenapa kamu mau belajar coding?</h2>
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      <h2 className="step-title">Kenapa kamu mau belajar coding?</h2>
+      <div className="sel-grid">
         {motivations.map((m) => {
           const Icon = m.icon;
+          const sel = motivation === m.id;
           return (
-            <Card
+            <button
               key={m.id}
-              hover
-              selected={motivation === m.id}
               onClick={() => setMotivation(m.id)}
-              className="flex items-center gap-3 p-4"
+              className={`sel-card ${sel ? "sel-card--selected" : ""}`}
             >
-              <Icon className="w-5 h-5 text-[var(--color-text-secondary)] shrink-0" />
-              <span className="text-sm font-semibold">{m.label}</span>
-              {motivation === m.id && (
-                <span className="ml-auto text-[var(--color-primary)] text-lg">✓</span>
-              )}
-            </Card>
+              <Icon className={`sel-card-icon ${sel ? "sel-card-icon--selected" : ""}`} />
+              <span className="sel-card-label">{m.label}</span>
+              {sel && <span className="sel-card-check">✓</span>}
+            </button>
           );
         })}
       </div>
-      <div className="flex gap-3">
+      <div className="step-nav">
         <Button variant="secondary" onClick={prevStep}>KEMBALI</Button>
         <Button fullWidth disabled={!motivation} onClick={nextStep}>LANJUTKAN</Button>
       </div>

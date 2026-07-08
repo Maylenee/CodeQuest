@@ -1,7 +1,7 @@
 import { useOnboardingStore } from "../../lib/store";
-import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { Search, Music, Users, Share2, Youtube, BookOpen } from "lucide-react";
+import "./Onboarding.css";
 
 const sources = [
   { id: "google", label: "Google", icon: Search },
@@ -17,28 +17,25 @@ export function StepReferralSource() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-center mb-6">Dari mana kamu tahu tentang platform ini?</h2>
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      <h2 className="step-title">Dari mana kamu tahu tentang platform ini?</h2>
+      <div className="sel-grid">
         {sources.map((s) => {
           const Icon = s.icon;
+          const sel = referralSource === s.id;
           return (
-            <Card
+            <button
               key={s.id}
-              hover
-              selected={referralSource === s.id}
               onClick={() => setReferralSource(s.id)}
-              className="flex items-center gap-3 p-4"
+              className={`sel-card ${sel ? "sel-card--selected" : ""}`}
             >
-              <Icon className="w-5 h-5 text-[var(--color-text-secondary)] shrink-0" />
-              <span className="text-sm font-semibold">{s.label}</span>
-              {referralSource === s.id && (
-                <span className="ml-auto text-[var(--color-primary)] text-lg">✓</span>
-              )}
-            </Card>
+              <Icon className="sel-card-icon" />
+              <span className="sel-card-label">{s.label}</span>
+              {sel && <span className="sel-card-check">✓</span>}
+            </button>
           );
         })}
       </div>
-      <div className="flex gap-3">
+      <div className="step-nav">
         <Button variant="secondary" onClick={prevStep}>KEMBALI</Button>
         <Button fullWidth disabled={!referralSource} onClick={nextStep}>LANJUTKAN</Button>
       </div>

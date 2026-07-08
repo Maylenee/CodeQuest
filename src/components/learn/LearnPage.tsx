@@ -1,15 +1,68 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Lock, Zap, Trophy, Gift, Flame, Heart, Gem, BookOpen, X, User } from "lucide-react";
+import {
+  ArrowLeft, Lock, Zap, Trophy, Gift, Flame, Heart, Gem, BookOpen, X, User,
+  Flag, Store, Settings, Star, ShoppingBag, Award, Clock, Calendar, ChevronRight,
+  Sparkles, Target, Shield, HelpCircle, LogOut, Code, Check, Plus, Minus,
+  Snowflake, Lightbulb, GitBranch, Repeat, List, BookKey, Type, FileText,
+  Box, Package, Bell, Volume2
+} from "lucide-react";
 import { Sidebar } from "./Sidebar";
 import { LearningPath } from "./LearningPath";
+import { LessonPage } from "../questions/LessonPage";
 import { useGameStore } from "../../lib/store";
-import { userGet } from "../../api";
+import { userGet, userUpdate, leaderboardGet, seedGet, referenceGet } from "../../api";
 import "./LearnPage.css";
 
-const missions = [
-  { icon: Zap, label: "Selesaikan 3 soal", done: 1, total: 3, xp: 20 },
-  { icon: Trophy, label: "Streak 1 hari", done: 1, total: 1, xp: 15 },
-  { icon: Zap, label: "Dapatkan 50 XP", done: 30, total: 50, xp: 30 },
+const shopItems = [
+  { id: "heart_refill", icon: Heart, name: "Isi Nyawa", desc: "Isi penuh 5 nyawa", price: 50, color: "var(--color-accent-red)" },
+  { id: "streak_freeze", icon: Snowflake, name: "Streak Freeze", desc: "Lindungi streak 1 hari", price: 30, color: "var(--color-secondary)" },
+  { id: "xp_boost", icon: Zap, name: "XP Boost", desc: "2x XP selama 30 menit", price: 80, color: "var(--color-accent-orange)" },
+  { id: "hint_unlock", icon: Lightbulb, name: "Hint Pack", desc: "5 hint tambahan", price: 20, color: "var(--color-accent-yellow)" },
+];
+
+const REFERENCE_FALLBACK = [
+  {
+    lessonId: "l1", title: "Apa itu Python?",
+    sections: [
+      { type: "text", content: "Python adalah bahasa pemrograman tingkat tinggi yang dibuat oleh Guido van Rossum dan pertama kali dirilis pada tahun 1991. Python dirancang dengan filosofi yang menekankan keterbacaan kode, terutama dengan penggunaan spasi putih (indentasi) yang signifikan." },
+      { type: "text", content: "Python dikenal sebagai bahasa yang mudah dipelajari karena sintaksnya yang sederhana dan mirip dengan bahasa Inggris biasa." },
+      { type: "code", caption: "Program Python pertama kamu:", code: "print(\"Hello, World!\")" },
+      { type: "text", content: "Python bersifat interpreted, artinya kode Python dijalankan baris per baris tanpa perlu dikompilasi terlebih dahulu." },
+      { type: "bullet", items: ["Bahasa tingkat tinggi (mudah dibaca dan ditulis)", "Interpreted (dijalankan langsung tanpa kompilasi)", "Multi-platform (Windows, Mac, Linux)"] }
+    ]
+  },
+  {
+    lessonId: "l2", title: "Variabel & Tipe Data",
+    sections: [
+      { type: "text", content: "Variabel adalah tempat untuk menyimpan data di memori komputer. Di Python, kamu tidak perlu mendeklarasikan tipe data secara eksplisit." },
+      { type: "code", caption: "Membuat variabel di Python:", code: "nama = \"Budi\"        # string\numur = 17            # integer\ntinggi = 1.75        # float\nsiswa = True         # boolean" },
+      { type: "table", columns: ["Tipe", "Contoh", "Penjelasan"], rows: [["int", "17, -5", "Bilangan bulat"], ["float", "3.14", "Bilangan desimal"], ["str", "\"Halo\"", "Teks"], ["bool", "True/False", "Nilai kebenaran"]] }
+    ]
+  },
+  {
+    lessonId: "l3", title: "Strings & Manipulasi",
+    sections: [
+      { type: "text", content: "String adalah tipe data untuk menyimpan teks. Bisa dibuat dengan kutip tunggal atau ganda." },
+      { type: "code", caption: "Operasi string:", code: "a = \"Halo \"\nb = \"Dunia\"\nhasil = a + b          # concat\npanjang = len(hasil)  # panjang string\npotong = hasil[0:4]   # slicing" },
+      { type: "table", columns: ["Method", "Contoh", "Hasil"], rows: [["upper()", "\"halo\".upper()", "\"HALO\""], ["lower()", "\"HALO\".lower()", "\"halo\""], ["split()", "\"a,b\".split(\",\")", "[\"a\",\"b\"]"]] }
+    ]
+  },
+  {
+    lessonId: "l5", title: "If-Else & Percabangan",
+    sections: [
+      { type: "text", content: "Percabangan memungkinkan program mengambil keputusan berdasarkan kondisi tertentu." },
+      { type: "code", caption: "Struktur if-else:", code: "nilai = 85\nif nilai >= 90:\n    print(\"A\")\nelif nilai >= 75:\n    print(\"B\")\nelse:\n    print(\"C\")" },
+      { type: "table", columns: ["Operator", "Arti"], rows: [["==", "Sama dengan"], ["!=", "Tidak sama"], [">", "Lebih besar"], ["<", "Lebih kecil"]] }
+    ]
+  },
+  {
+    lessonId: "l6", title: "For Loop",
+    sections: [
+      { type: "text", content: "Perulangan digunakan untuk mengulang blok kode beberapa kali." },
+      { type: "code", caption: "For loop:", code: "for i in range(5):\n    print(i)\n# 0 1 2 3 4" },
+      { type: "code", caption: "Iterasi list:", code: "buah = [\"apel\", \"mangga\"]\nfor b in buah:\n    print(b)" }
+    ]
+  }
 ];
 
 function Modal({ open, onClose, title, children }: { open: boolean; onClose: () => void; title?: string; children: React.ReactNode }) {
@@ -29,10 +82,496 @@ function Modal({ open, onClose, title, children }: { open: boolean; onClose: () 
   );
 }
 
+function LeaderboardSection() {
+  const [entries, setEntries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await leaderboardGet();
+        setEntries(data.entries || []);
+      } catch {
+        setEntries([
+          { rank: 1, name: "CodeMaster", xp: 2840, level: 28 },
+          { rank: 2, name: "PixelWizard", xp: 2150, level: 21 },
+          { rank: 3, name: "ByteRider", xp: 1920, level: 19 },
+          { rank: 4, name: "LogicQueen", xp: 1650, level: 16 },
+          { rank: 5, name: "DevNinja", xp: 1430, level: 14 },
+          { rank: 6, name: "SyntaxHero", xp: 1200, level: 12 },
+          { rank: 7, name: "Kamu", xp: 980, level: 9 },
+          { rank: 8, name: "DataDiver", xp: 750, level: 7 },
+          { rank: 9, name: "LoopMaster", xp: 520, level: 5 },
+          { rank: 10, name: "CraftCoder", xp: 300, level: 3 },
+        ]);
+      }
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  if (loading) return <div className="loading-text">Memuat papan skor...</div>;
+
+  return (
+    <div>
+      <div className="sec-header">
+        <Trophy className="text-[var(--color-accent-yellow)]" />
+        <h2 className="sec-title">Papan Skor Minggu Ini</h2>
+      </div>
+      <div className="lb-list">
+        {entries.map((e, i) => (
+          <div key={i} className="sec-card-row">
+            <span className={`lb-rank ${i < 3 ? "lb-rank--top3" : "lb-rank--rest"}`}>
+              {e.rank}
+            </span>
+            <div className="lb-info">
+              <p className="lb-name">{e.name}</p>
+              <p className="lb-level">Level {e.level}</p>
+            </div>
+            <span className="lb-xp">{e.xp} XP</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MissionsSection() {
+  const { xp, streak, addXp, userId } = useGameStore();
+  const [progress, setProgress] = useState<any[]>([]);
+  const [claimed, setClaimed] = useState<string[]>(() => {
+    const today = new Date().toDateString();
+    try {
+      const stored = JSON.parse(localStorage.getItem("codequest_claimed") || "{}");
+      return stored[today] || [];
+    } catch { return []; }
+  });
+
+  useEffect(() => {
+    async function load() {
+      const uid = localStorage.getItem("codequest_userId") || "user-default";
+      try {
+        const data = await userGet(uid);
+        setProgress(data.progress || []);
+      } catch {}
+    }
+    load();
+  }, []);
+
+  const lessonsDone = progress.filter((p: any) => p.status === "completed").length;
+  const dailyMissions = [
+    { id: "lessons", icon: Zap, label: "Selesaikan 3 pelajaran", done: Math.min(lessonsDone, 3), total: 3, xp: 20 },
+    { id: "streak", icon: Trophy, label: "Streak 1 hari", done: Math.min(streak, 1), total: 1, xp: 15 },
+    { id: "xp_target", icon: Zap, label: "Dapatkan 50 XP", done: Math.min(xp, 50), total: 50, xp: 30 },
+  ];
+
+  const claimReward = (missionId: string, xpReward: number) => {
+    if (claimed.includes(missionId)) return;
+    addXp(xpReward);
+    const newClaimed = [...claimed, missionId];
+    setClaimed(newClaimed);
+    const today = new Date().toDateString();
+    const stored = JSON.parse(localStorage.getItem("codequest_claimed") || "{}");
+    stored[today] = newClaimed;
+    localStorage.setItem("codequest_claimed", JSON.stringify(stored));
+    const uid = localStorage.getItem("codequest_userId") || "user-default";
+    userUpdate({ id: uid, xp: xp + xpReward }).catch(() => {});
+  };
+
+  return (
+    <div>
+      <div className="sec-header">
+        <Flag className="text-[var(--color-accent-orange)]" />
+        <h2 className="sec-title">Misi Harian</h2>
+      </div>
+      <p className="sec-desc">Selesaikan misi untuk dapatkan XP dan reward spesial!</p>
+      <div className="mission-list">
+        {dailyMissions.map((m) => {
+          const Icon = m.icon;
+          const pct = Math.min((m.done / m.total) * 100, 100);
+          const isComplete = m.done >= m.total;
+          const isClaimed = claimed.includes(m.id);
+          return (
+            <div key={m.id} className="mission-item">
+              <div className="mission-item-top">
+                <div className="mission-item-icon">
+                  <Icon />
+                </div>
+                <div className="mission-item-info">
+                  <p className="mission-item-label">{m.label}</p>
+                  <p className="mission-item-progress-text">{m.done}/{m.total} selesai</p>
+                </div>
+                <div className="mission-item-reward">
+                  <Trophy />
+                  <span>+{m.xp}</span>
+                </div>
+              </div>
+              <div className="mission-bar-track">
+                <div className="mission-bar-fill--orange" style={{ width: `${pct}%` }} />
+              </div>
+              {isComplete && !isClaimed && (
+                <button
+                  onClick={() => claimReward(m.id, m.xp)}
+                  className="mission-claim-btn"
+                >
+                  KLAIM HADIAH +{m.xp} XP
+                </button>
+              )}
+              {isClaimed && (
+                <p className="mission-claimed-text">✓ Sudah diklaim</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div className="mission-footer">
+        <p>Misi baru akan datang besok!</p>
+      </div>
+    </div>
+  );
+}
+
+function ShopSection() {
+  const { gems, setGems } = useGameStore();
+  const [msg, setMsg] = useState("");
+  const [buys, setBuys] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("codequest_purchases") || "{}");
+      setBuys(stored);
+    } catch {}
+  }, []);
+
+  const buy = async (item: typeof shopItems[0]) => {
+    if (gems >= item.price) {
+      const newGems = gems - item.price;
+      setGems(newGems);
+      const uid = localStorage.getItem("codequest_userId") || "user-default";
+      await userUpdate({ id: uid, gems: newGems }).catch(() => {});
+
+      const newBuys = { ...buys, [item.id]: (buys[item.id] || 0) + 1 };
+      setBuys(newBuys);
+      localStorage.setItem("codequest_purchases", JSON.stringify(newBuys));
+
+      setMsg(`${item.name} berhasil dibeli!`);
+      setTimeout(() => setMsg(""), 2000);
+    } else {
+      setMsg("Gems tidak mencukupi!");
+      setTimeout(() => setMsg(""), 2000);
+    }
+  };
+
+  return (
+    <div>
+      <div className="sec-header">
+        <ShoppingBag className="text-[var(--color-accent-purple)]" />
+        <h2 className="sec-title">Toko</h2>
+      </div>
+      <div className="shop-balance">
+        <Gem />
+        <span>Saldo: {gems} Gems</span>
+      </div>
+      {msg && <div className="shop-msg">{msg}</div>}
+      <div className="shop-grid">
+        {shopItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.id} className="shop-item">
+              <div className="shop-item-icon" style={{ background: `${item.color}20` }}>
+                <Icon style={{ color: item.color }} />
+              </div>
+              <p className="shop-item-name">{item.name}</p>
+              <p className="shop-item-desc">{item.desc}</p>
+              <button onClick={() => buy(item)} className="shop-btn">
+                <Gem /> {item.price}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ProfileSection() {
+  const { xp, level, streak, hearts, gems, league, userName, userId, loadFromUser } = useGameStore();
+  const [name, setName] = useState(userName);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const leagues = [
+    { name: "Bronze", icon: Shield, color: "var(--color-accent-orange)", min: 0 },
+    { name: "Silver", icon: Shield, color: "var(--color-text-muted)", min: 300 },
+    { name: "Gold", icon: Award, color: "var(--color-accent-yellow)", min: 800 },
+    { name: "Sapphire", icon: Award, color: "var(--color-secondary)", min: 1500 },
+    { name: "Ruby", icon: Award, color: "var(--color-accent-red)", min: 2500 },
+    { name: "Diamond", icon: Star, color: "var(--color-accent-purple)", min: 4000 },
+  ];
+  const nextLeague = leagues.find((l) => l.min > xp) || leagues[leagues.length - 1];
+  const currentLeague = [...leagues].reverse().find((l) => xp >= l.min) || leagues[0];
+  const LeagueIcon = currentLeague.icon;
+
+  return (
+    <div>
+      <div className="sec-header">
+        <User className="text-[var(--color-secondary)]" />
+        <h2 className="sec-title">Profil</h2>
+      </div>
+      <div className="profile-avatar-card">
+        <div className="profile-avatar">
+          <User />
+        </div>
+        <p className="profile-name">{name}</p>
+        <div className="profile-league">
+          <LeagueIcon style={{ color: currentLeague.color }} />
+          <span style={{ color: currentLeague.color }}>{currentLeague.name}</span>
+        </div>
+      </div>
+      <div className="profile-stats">
+        <div className="profile-stat profile-stat--xp">
+          <Trophy />
+          <p className="profile-stat-value">{xp}</p>
+          <p className="profile-stat-label">Total XP</p>
+        </div>
+        <div className="profile-stat profile-stat--level">
+          <Star />
+          <p className="profile-stat-value">{level}</p>
+          <p className="profile-stat-label">Level</p>
+        </div>
+        <div className="profile-stat profile-stat--streak">
+          <Flame />
+          <p className="profile-stat-value">{streak}</p>
+          <p className="profile-stat-label">Streak</p>
+        </div>
+        <div className="profile-stat profile-stat--gems">
+          <Gem />
+          <p className="profile-stat-value">{gems}</p>
+          <p className="profile-stat-label">Gems</p>
+        </div>
+      </div>
+      <div className="profile-league-progress">
+        <p className="profile-league-label">LIGA SELANJUTNYA: {nextLeague.name}</p>
+        <div className="profile-league-bar">
+          <div className="profile-league-fill" style={{ width: `${Math.min((xp / (nextLeague as any).min) * 100, 100)}%` }} />
+        </div>
+        <p className="profile-league-xp">{xp} / {(nextLeague as any).min} XP</p>
+      </div>
+      <div className="profile-edit">
+        <label className="profile-edit-label">Nama Pengguna</label>
+        <div className="profile-edit-row">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="profile-edit-input"
+          />
+          <button
+            onClick={async () => {
+              if (saving) return;
+              setSaving(true);
+              try {
+                const uid = localStorage.getItem("codequest_userId") || "user-default";
+                const res = await userUpdate({ id: uid, name });
+                if (res.user) loadFromUser(res.user);
+                setSaved(true);
+              } catch {}
+              setSaving(false);
+              setTimeout(() => setSaved(false), 2000);
+            }}
+            className="profile-save-btn"
+          >
+            {saving ? "..." : saved ? "✓" : "Simpan"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MoreSection() {
+  return (
+    <div>
+      <div className="sec-header">
+        <Settings className="text-[var(--color-text-muted)]" />
+        <h2 className="sec-title">Lainnya</h2>
+      </div>
+      <div className="more-list">
+        <div className="more-item">
+          <Bell className="more-item-icon" />
+          <div className="more-item-info">
+            <p className="more-item-title">Notifikasi</p>
+            <p className="more-item-desc">Pengingat belajar harian</p>
+          </div>
+          <label className="toggle">
+            <input type="checkbox" defaultChecked />
+            <div className="toggle-track">
+              <div className="toggle-thumb" />
+            </div>
+          </label>
+        </div>
+        <div className="more-item">
+          <Volume2 className="more-item-icon" />
+          <div className="more-item-info">
+            <p className="more-item-title">Efek Suara</p>
+            <p className="more-item-desc">Suara saat menjawab soal</p>
+          </div>
+          <label className="toggle">
+            <input type="checkbox" defaultChecked />
+            <div className="toggle-track">
+              <div className="toggle-thumb" />
+            </div>
+          </label>
+        </div>
+      </div>
+      <div className="more-list" style={{ marginTop: 16 }}>
+        <button className="more-nav-item">
+          <HelpCircle className="more-nav-icon" />
+          <div className="more-item-info">
+            <p className="more-nav-title">Pusat Bantuan</p>
+            <p className="more-item-desc">FAQ & panduan</p>
+          </div>
+          <ChevronRight className="more-nav-arrow" />
+        </button>
+        <button className="more-nav-item more-nav-item--logout">
+          <LogOut />
+          <div className="more-item-info">
+            <p className="more-nav-title">Keluar</p>
+            <p className="more-item-desc">Hapus data lokal dan kembali</p>
+          </div>
+        </button>
+      </div>
+      <div className="more-version">
+        <p>CodeQuest v0.1.0</p>
+      </div>
+    </div>
+  );
+}
+
+function AlphabetSection({ onOpenLesson }: { onOpenLesson: (lessonId: string) => void }) {
+  const [refs, setRefs] = useState<any[]>([]);
+  const [openRef, setOpenRef] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await referenceGet();
+        if (data.references?.length) {
+          setRefs(data.references);
+          return;
+        }
+      } catch {}
+      setRefs(REFERENCE_FALLBACK);
+    }
+    load();
+  }, []);
+
+  const activeRef = refs.find((r) => r.lessonId === openRef);
+
+  if (activeRef) {
+    return (
+      <div>
+        <button onClick={() => setOpenRef(null)} className="ref-back">
+          ← Kembali ke daftar
+        </button>
+        <h2 className="ref-title">{activeRef.title}</h2>
+        <div className="ref-body">
+          {activeRef.sections.map((sec: any, i: number) => (
+            <div key={i}>
+              {sec.type === "text" && (
+                <p className="ref-text">{sec.content}</p>
+              )}
+              {sec.type === "code" && (
+                <div className="ref-code">
+                  {sec.caption && <p className="ref-code-caption">{sec.caption}</p>}
+                  <pre>{sec.code}</pre>
+                </div>
+              )}
+              {sec.type === "bullet" && (
+                <ul className="ref-bullet">
+                  {sec.items.map((item: string, j: number) => (
+                    <li key={j}>
+                      <span className="ref-bullet-dot">•</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {sec.type === "table" && (
+                <div className="ref-table-wrap">
+                  <table className="ref-table">
+                    <thead>
+                      <tr>
+                        {sec.columns.map((col: string, j: number) => (
+                          <th key={j}>{col}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sec.rows.map((row: string[], j: number) => (
+                        <tr key={j}>
+                          {row.map((cell: string, k: number) => (
+                            <td key={k}>{cell}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => { onOpenLesson(activeRef.lessonId); setOpenRef(null); }}
+          className="ref-btn"
+        >
+          LANJUTKAN KE SOAL
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="sec-header">
+        <BookOpen className="text-[var(--color-secondary)]" />
+        <h2 className="sec-title">Modul Referensi</h2>
+      </div>
+      <p className="sec-desc">Pelajari materi, lalu lanjutkan ke soal latihan</p>
+      <div className="alpha-grid">
+        {refs.map((ref, i) => {
+          const sectionCount = ref.sections.length;
+          return (
+            <div
+              key={i}
+              className="alpha-card"
+              onClick={() => setOpenRef(ref.lessonId)}
+              role="button"
+              tabIndex={0}
+            >
+              <div className="alpha-card-icon">
+                <BookOpen />
+              </div>
+              <p className="alpha-card-title">{ref.title}</p>
+              <p className="alpha-card-desc">{sectionCount} topik materi</p>
+            </div>
+          );
+        })}
+        {refs.length === 0 && (
+          <div className="text-center py-12 text-[var(--color-text-muted)] col-span-2">
+            <p>Memuat materi referensi...</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function LearnPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
-  const { streak, hearts, gems, loadFromUser } = useGameStore();
+  const [activeLesson, setActiveLesson] = useState<string | null>(null);
+  const { streak, hearts, gems, loadFromUser, xp } = useGameStore();
   const [loading, setLoading] = useState(true);
   const [showGuide, setShowGuide] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -49,6 +588,10 @@ export function LearnPage() {
     }
     load();
   }, [loadFromUser]);
+
+  if (activeLesson) {
+    return <LessonPage lessonId={activeLesson} onBack={() => setActiveLesson(null)} />;
+  }
 
   if (loading) {
     return (
@@ -107,47 +650,12 @@ export function LearnPage() {
         <div className="learn-scroll">
           <div className="learn-scroll-inner">
             {activeSection === "home" && <LearningPath />}
-            {activeSection === "alphabet" && (
-              <div className="section-placeholder">
-                <BookOpen />
-                <h2>Modul Referensi</h2>
-                <p>Coming soon</p>
-              </div>
-            )}
-            {activeSection === "leaderboard" && (
-              <div className="section-placeholder">
-                <Trophy />
-                <h2>Papan Skor</h2>
-                <p>Selesaikan 5 pelajaran untuk membuka papan skor</p>
-              </div>
-            )}
-            {activeSection === "missions" && (
-              <div className="section-placeholder">
-                <Flag />
-                <h2>Misi Harian</h2>
-                <p>Selesaikan misi untuk dapatkan XP dan reward</p>
-              </div>
-            )}
-            {activeSection === "shop" && (
-              <div className="section-placeholder">
-                <Store />
-                <h2>Toko</h2>
-                <p>Coming soon</p>
-              </div>
-            )}
-            {activeSection === "profile" && (
-              <div className="section-placeholder">
-                <User />
-                <h2>Profil</h2>
-                <p>Lengkapi profil untuk pengalaman lebih personal</p>
-              </div>
-            )}
-            {activeSection === "more" && (
-              <div className="section-placeholder">
-                <h2>Lainnya</h2>
-                <p>Pengaturan dan informasi aplikasi</p>
-              </div>
-            )}
+            {activeSection === "alphabet" && <AlphabetSection onOpenLesson={setActiveLesson} />}
+            {activeSection === "leaderboard" && <LeaderboardSection />}
+            {activeSection === "missions" && <MissionsSection />}
+            {activeSection === "shop" && <ShopSection />}
+            {activeSection === "profile" && <ProfileSection />}
+            {activeSection === "more" && <MoreSection />}
           </div>
         </div>
       </div>
@@ -166,10 +674,18 @@ export function LearnPage() {
           <div className="leaderboard-progress">
             <div className="leaderboard-progress-top">
               <span>Progress</span>
-              <strong>2 / 5</strong>
+              <strong>{(() => {
+                const uid = localStorage.getItem("codequest_userId") || "user-default";
+                const p = JSON.parse(localStorage.getItem(`codequest_progress_${uid}`) || "[]");
+                return `${p.filter((x: any) => x.status === "completed").length} / 5`;
+              })()}</strong>
             </div>
             <div className="leaderboard-bar">
-              <div className="leaderboard-bar-fill leaderboard-bar-fill--animated" style={{ width: "40%" }} />
+              <div className="leaderboard-bar-fill leaderboard-bar-fill--animated" style={{ width: `${(() => {
+                const uid = localStorage.getItem("codequest_userId") || "user-default";
+                const p = JSON.parse(localStorage.getItem(`codequest_progress_${uid}`) || "[]");
+                return (p.filter((x: any) => x.status === "completed").length / 5) * 100;
+              })()}%` }} />
             </div>
           </div>
         </div>
@@ -177,29 +693,39 @@ export function LearnPage() {
         <div className="r-card">
           <h3 className="missions-title">Misi Harian</h3>
           <div className="missions-list">
-            {missions.map((m, i) => {
-              const Icon = m.icon;
-              const pct = Math.min((m.done / m.total) * 100, 100);
-              return (
-                <div key={i}>
-                  <div className="mission-top">
-                    <Icon className="mission-icon" />
-                    <span className="mission-label">{m.label}</span>
-                    <div className="mission-reward">
-                      <Trophy />
-                      <span>+{m.xp}</span>
+            {(() => {
+              const uid = localStorage.getItem("codequest_userId") || "user-default";
+              const progress = JSON.parse(localStorage.getItem(`codequest_progress_${uid}`) || "[]");
+              const lessonsDone = progress.filter((p: any) => p.status === "completed").length;
+              const sidebarMissions = [
+                { icon: Zap, label: "Selesaikan 3 pelajaran", done: Math.min(lessonsDone, 3), total: 3, xp: 20 },
+                { icon: Trophy, label: "Streak 1 hari", done: Math.min(streak, 1), total: 1, xp: 15 },
+                { icon: Zap, label: "Dapatkan 50 XP", done: Math.min(xp, 50), total: 50, xp: 30 },
+              ];
+              return sidebarMissions.map((m, i) => {
+                const Icon = m.icon;
+                const pct = Math.min((m.done / m.total) * 100, 100);
+                return (
+                  <div key={i}>
+                    <div className="mission-top">
+                      <Icon className="mission-icon" />
+                      <span className="mission-label">{m.label}</span>
+                      <div className="mission-reward">
+                        <Trophy />
+                        <span>+{m.xp}</span>
+                      </div>
+                    </div>
+                    <div className="mission-bar-wrap">
+                      <div className="mission-bar-fill mission-bar-fill--animated" style={{ width: `${pct}%`, animationDelay: `${i * 0.15}s` }} />
+                      <div className="mission-gift"><Gift /></div>
+                    </div>
+                    <div className="mission-count">
+                      <span>{m.done} / {m.total}</span>
                     </div>
                   </div>
-                  <div className="mission-bar-wrap">
-                    <div className="mission-bar-fill mission-bar-fill--animated" style={{ width: `${pct}%`, animationDelay: `${i * 0.15}s` }} />
-                    <div className="mission-gift"><Gift /></div>
-                  </div>
-                  <div className="mission-count">
-                    <span>{m.done} / {m.total}</span>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              });
+            })()}
           </div>
         </div>
 
@@ -218,7 +744,6 @@ export function LearnPage() {
         </div>
       </div>
 
-      {/* GUIDE MODAL */}
       <Modal open={showGuide} onClose={() => setShowGuide(false)} title="Buku Panduan">
         <p className="guide-text">
           Selamat datang di <strong>CodeQuest</strong>! Panduan ini akan membantu kamu memulai.
@@ -237,7 +762,6 @@ export function LearnPage() {
         </div>
       </Modal>
 
-      {/* PROFILE MODAL */}
       <Modal open={showProfile} onClose={() => setShowProfile(false)} title="Buat Profil">
         <div className="form-stack">
           <div className="form-group">
@@ -252,7 +776,6 @@ export function LearnPage() {
         </div>
       </Modal>
 
-      {/* LOGIN MODAL */}
       <Modal open={showLogin} onClose={() => setShowLogin(false)} title="Masuk">
         <div className="form-stack">
           <div className="form-group">

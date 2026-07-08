@@ -1,147 +1,150 @@
 # CodeQuest
 
-A gamified coding learning platform — interactive lessons, daily missions, and progress tracking for Python & JavaScript. Built with React + Vite + TypeScript, backed by EdgeOne cloud functions (Python).
+Platform pembelajaran coding interaktif berbasis game — belajar Python & JavaScript melalui pelajaran interaktif, misi harian, dan pelacakan kemajuan. Dibangun dengan React + Vite + TypeScript, didukung backend EdgeOne Cloud Functions (Python).
 
-## Overview
+## Ikhtisar
 
-CodeQuest helps beginners learn programming through interactive, bite-sized lessons with gamification:
+CodeQuest membantu pemula belajar coding melalui pelajaran interaktif yang ringkas dengan mekanisme gamifikasi:
 
-- **Interactive Lessons** — Multiple choice, fill-in-the-blank, predict output, spot the bug, write code, and drag-drop questions
-- **Two Learning Tracks** — Python and JavaScript, each with structured learning paths
-- **Gamified Progression** — XP, levels, streaks, hearts (lives), gems, leagues, and daily targets
-- **Daily Missions** — Daily coding challenges to build streaks
-- **Leaderboards** — Compete with other learners
-- **AI Chat Assistant** — Chat history per lesson for hints/explanations
-- **Onboarding Flow** — Personalized track selection, skill assessment, daily targets, and notifications
+- **Pelajaran Interaktif** — Pilihan ganda, isian singkat, tebak output, cari bug, menulis kode, dan drag-drop
+- **Dua Jalur Belajar** — Python dan JavaScript, masing-masing dengan jalur pembelajaran terstruktur
+- **Progresi Gamifikasi** — XP, level, streak, hati (nyawa), koin permata, league, dan target harian
+- **Misi Harian** — Tantangan coding harian untuk membangun streak
+- **Papan Peringkat** — Bersaing dengan pembelajar lain
+- **Asisten AI** — Riwayat chat per pelajaran untuk petunjuk/penjelasan
+- **Alur Onboarding** — Pemilihan jalur personal, penilaian kemampuan, target harian, dan notifikasi
 
 ## Tech Stack
 
-| Layer | Stack |
-|-------|-------|
-| Frontend | React 18 + TypeScript + Vite |
-| State | Zustand |
-| Styling | CSS Variables + CSS Modules |
+| Lapisan | Teknologi |
+|---------|-----------|
+| Frontend | React 19 + TypeScript + Vite |
+| State Management | Zustand |
+| Styling | Tailwind CSS v4 + CSS Variables |
 | Backend | EdgeOne Cloud Functions (Python) |
 | Database | EdgeOne KV / D1 (via cloud functions) |
 | Deployment | EdgeOne Pages / Makers |
+| AI | OpenAI-compatible LLM via AI Gateway |
 
-## Project Structure
+## Struktur Proyek
 
 ```
 CodeQuest/
 ├── cloud-functions/              # EdgeOne Python cloud functions
-│   ├── user/                     # User init, get, streak
-│   ├── progress/                 # Progress updates
-│   ├── submissions/              # Code submissions
-│   ├── questions/                # Question fetching & verification
-│   ├── leaderboard/              # Leaderboard
-│   ├── chat-history/             # Chat history per lesson
-│   ├── history/                  # History
-│   └── seed/                     # Database seeding
-├── public/prepare-rag/           # RAG data prep (legacy/unused)
+│   ├── user/                     # Inisialisasi, get, streak pengguna
+│   ├── progress/                 # Update kemajuan
+│   ├── submissions/              # Pengiriman kode
+│   ├── questions/                # Ambil & verifikasi soal
+│   ├── leaderboard/              # Papan peringkat
+│   ├── chat-history/             # Riwayat chat per pelajaran
+│   ├── history/                  # Riwayat
+│   └── seed/                     # Seeding database
+├── public/prepare-rag/           # Persiapan data RAG (legacy)
 ├── src/
-│   ├── api.ts                    # Cloud function API client
-│   ├── App.tsx                   # App routing (selection → survey → learn)
+│   ├── api.ts                    # Klien API cloud functions
+│   ├── App.tsx                   # Routing aplikasi (selection -> survey -> learn)
 │   ├── main.tsx                  # Entry point
-│   ├── index.css                 # Global styles (CSS variables)
+│   ├── index.css                 # Global styles (Tailwind + custom theme)
 │   ├── lib/
-│   │   ├── store.ts              # Zustand store (user, progress, UI state)
-│   │   ├── types.ts              # TypeScript types (UserData, Question, LessonNode)
-│   │   └── utils.ts              # Utilities
+│   │   ├── store.ts              # Zustand store (onboarding + game state)
+│   │   ├── types.ts              # TypeScript types
+│   │   └── utils.ts              # Fungsi utilitas
 │   └── components/
-│       ├── ui/                   # Reusable UI (Button, Card, Modal, ProgressBar, Mascot, Confetti)
-│       ├── onboarding/           # Onboarding flow (SelectionScreen, SurveyFlow, steps)
-│       ├── learn/                # Learning pages (LearnPage, LearningPath, DailyMissions, Sidebar, StatusBar)
-│       └── questions/            # Question components (MCQ, FillBlank, PredictOutput, LessonPage)
-├── agents/                       # Legacy RAG agent (unused)
-├── edgeone.json                  # EdgeOne config
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── README.md
+│       ├── ui/                   # Komponen reusable (Button, Card, Modal, ProgressBar, Mascot, Confetti)
+│       ├── onboarding/           # Alur onboarding (SelectionScreen, SurveyFlow, steps)
+│       ├── learn/                # Halaman belajar (LearnPage, LearningPath, DailyMissions, Sidebar, StatusBar)
+│       └── questions/            # Komponen soal (MCQ, FillBlank, PredictOutput, LessonPage)
+├── edgeone.json                  # Konfigurasi EdgeOne
+├── vite.config.ts                # Konfigurasi Vite + Tailwind
+└── package.json
 ```
 
-## Getting Started
+## Memulai
 
-### Prerequisites
+### Prasyarat
 
-- Node.js ≥ 18
-- Python ≥ 3.10 (for cloud functions)
+- Node.js >= 18
+- Python >= 3.10 (untuk cloud functions)
 - EdgeOne CLI: `npm i -g edgeone`
 
-### Local Development
+### Pengembangan Lokal
 
 ```bash
-# Install frontend deps
+# Install dependensi frontend
 npm install
 
-# Install cloud function deps
-pip install -r cloud-functions/requirements.txt  # if exists, or per-function
+# Install dependensi cloud functions
+pip install -r cloud-functions/requirements.txt
 
-# Copy env and configure
+# Copy environment variables
 cp .env.example .env
-# Fill in EdgeOne credentials
+# Isi AI_GATEWAY_API_KEY dan AI_GATEWAY_BASE_URL
 
-# Start dev server (frontend + cloud functions)
-edgeone pages dev
-```
-
-Or run frontend only:
-
-```bash
+# Jalankan dev server (frontend saja)
 npm run dev
+
+# Atau dengan cloud functions
+edgeone pages dev
 ```
 
 ### Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `EDGEONE_API_TOKEN` | Yes | EdgeOne API token for cloud function deployment |
-| `EDGEONE_PROJECT_NAME` | Yes | EdgeOne project name |
+| Variable | Wajib | Deskripsi |
+|----------|-------|-----------|
+| `AI_GATEWAY_API_KEY` | Ya | API key untuk LLM (OpenAI-compatible) |
+| `AI_GATEWAY_BASE_URL` | Ya | Base URL endpoint LLM |
+| `AI_GATEWAY_MODEL` | Tidak | Nama model (default: `@makers/deepseek-v4-flash`) |
 
 ## Cloud Functions
 
-Each folder under `cloud-functions/` is a separate EdgeOne Function (Python):
+Setiap folder di `cloud-functions/` adalah EdgeOne Function (Python) terpisah:
 
-| Function | Route | Purpose |
-|----------|-------|---------|
-| `user/init` | POST `/user/init` | Initialize new user |
-| `user/get` | GET `/user/get` | Get user profile |
+| Fungsi | Route | Tujuan |
+|--------|-------|--------|
+| `user/init` | POST `/user/init` | Inisialisasi pengguna baru |
+| `user/get` | GET `/user/get` | Ambil profil pengguna |
 | `user/streak` | POST `/user/streak` | Update streak |
-| `progress/update` | POST `/progress/update` | Update lesson progress |
-| `submissions/create` | POST `/submissions/create` | Save code submission |
-| `questions/get` | GET `/questions/get` | Fetch questions for lesson |
-| `questions/verify` | POST `/questions/verify` | Verify answer |
-| `leaderboard/get` | GET `/leaderboard/get` | Get leaderboard |
-| `chat-history` | POST `/chat-history` | Get/save chat history |
+| `progress/update` | POST `/progress/update` | Update kemajuan pelajaran |
+| `submissions/create` | POST `/submissions/create` | Simpan submission kode |
+| `questions/get` | GET `/questions/get` | Ambil soal untuk pelajaran |
+| `questions/verify` | POST `/questions/verify` | Verifikasi jawaban |
+| `leaderboard/get` | GET `/leaderboard/get` | Ambil papan peringkat |
+| `chat-history` | POST `/chat-history` | Ambil/simpan riwayat chat |
 | `seed/init` | POST `/seed/init` | Seed database |
-| `seed/get` | GET `/seed/get` | Get seed data |
+| `seed/get` | GET `/seed/get` | Ambil data seed |
 
-## Features Overview
+## Fitur
 
-### Learning Tracks
-- **Python** — Variables, loops, functions, data structures, OOP, modules
-- **JavaScript** — Variables, functions, DOM, async, ES6+, frameworks basics
+### Jalur Belajar
+- **Python** — Variabel, perulangan, fungsi, struktur data, OOP, modul
+- **JavaScript** — Variabel, fungsi, DOM, async, ES6+, dasar framework
 
-### Question Types
-| Type | Component | Description |
-|------|-----------|-------------|
-| `mcq` | `MultipleChoice.tsx` | Single/multiple choice |
-| `fill_blank` | `FillBlank.tsx` | Fill in code blanks |
-| `predict_output` | `PredictOutput.tsx` | Predict code output |
-| `spot_bug` | *(planned)* | Find the bug |
-| `write_code` | *(planned)* | Write code from scratch |
-| `drag_drop` | *(planned)* | Drag & drop code blocks |
-| `refactor` | *(planned)* | Refactor code |
+### Tipe Soal
+| Tipe | Komponen | Deskripsi |
+|------|----------|-----------|
+| `mcq` | `MultipleChoice.tsx` | Pilihan ganda (satu/banyak) |
+| `fill_blank` | `FillBlank.tsx` | Isian singkat kode |
+| `predict_output` | `PredictOutput.tsx` | Tebak output kode |
+| `spot_bug` | `SpotBug.tsx` | Cari bug pada kode |
+| `write_code` | `WriteCode.tsx` | Tulis kode dari awal |
+| `drag_drop` | `DragDrop.tsx` | Drag & drop urutan baris kode |
+| `refactor` | `Refactor.tsx` | Refaktor kode |
 
-### Gamification
-- **XP & Levels** — Earn XP per question, level up
-- **Streaks** — Daily login streaks with rewards
-- **Hearts** — Lives system (lose on wrong answer)
-- **Gems** — Currency for hints/shop
-- **Leagues** — Weekly leaderboards (Bronze → Diamond)
-- **Daily Target** — User-set daily XP goal
-- **Daily Missions** — 3 daily tasks for bonus rewards
+### Gamifikasi
+- **XP & Level** — Dapatkan XP tiap menjawab soal, naik level
+- **Streak** — Login streak harian dengan hadiah
+- **Hearts** — Sistem nyawa (berkurang jika salah menjawab)
+- **Gems** — Mata uang untuk petunjuk/toko
+- **Leagues** — Papan peringkat mingguan (Bronze -> Diamond)
+- **Daily Target** — Target XP harian yang ditentukan pengguna
+- **Daily Missions** — 3 misi harian untuk bonus
+
+### Alur Onboarding
+- **Pemilihan Jalur** — Pilih Python atau JavaScript
+- **Survey Awal** — Sumber referral, motivasi, tingkat kemampuan
+- **Target Harian** — Tentukan target belajar harian
+- **Notifikasi** — Izin notifikasi pengingat belajar
+- **Tes Penempatan** — Opsi placement test atau mulai dari dasar
 
 ## Deployment
 
@@ -149,14 +152,12 @@ Each folder under `cloud-functions/` is a separate EdgeOne Function (Python):
 # Build frontend
 npm run build
 
-# Deploy to EdgeOne Pages
+# Deploy ke EdgeOne Pages
 edgeone pages deploy dist
 ```
 
-Cloud functions deploy automatically with `edgeone makers deploy` or via the EdgeOne dashboard.
+Cloud Functions deploy otomatis dengan `edgeone makers deploy` atau melalui dashboard EdgeOne.
 
-## Script / Makers console.
-
-## License
+## Lisensi
 
 MIT

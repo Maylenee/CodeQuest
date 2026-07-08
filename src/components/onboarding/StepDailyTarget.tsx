@@ -1,7 +1,7 @@
 import { useOnboardingStore } from "../../lib/store";
-import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { Coffee, Zap, Target, Rocket } from "lucide-react";
+import "./Onboarding.css";
 
 const targets = [
   { id: 10, label: "Santai", icon: Coffee, desc: "10 menit" },
@@ -15,27 +15,27 @@ export function StepDailyTarget() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-center mb-2">Berapa lama target belajar harianmu?</h2>
-      <p className="text-sm text-[var(--color-text-muted)] text-center mb-6">Kamu bisa ubah kapan aja</p>
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      <h2 className="step-title">Berapa lama target belajar harianmu?</h2>
+      <p className="step-sub">Kamu bisa ubah kapan aja</p>
+      <div className="target-grid">
         {targets.map((t) => {
           const Icon = t.icon;
+          const sel = dailyTarget === t.id;
           return (
-            <Card
+            <button
               key={t.id}
-              hover
-              selected={dailyTarget === t.id}
               onClick={() => setDailyTarget(t.id)}
-              className="flex flex-col items-center text-center p-6"
+              className="sel-card sel-card--center"
+              style={sel ? { borderColor: "var(--color-primary)", background: "var(--color-primary-light)" } : {}}
             >
-              <Icon className="w-8 h-8 mb-2" style={{ color: dailyTarget === t.id ? "var(--color-primary)" : "var(--color-text-muted)" }} />
+              <Icon className="sel-card-icon" style={{ color: sel ? "var(--color-primary)" : "var(--color-text-muted)" }} />
               <span className="text-lg font-bold">{t.desc}</span>
               <span className="text-xs text-[var(--color-text-muted)]">{t.label}</span>
-            </Card>
+            </button>
           );
         })}
       </div>
-      <div className="flex gap-3">
+      <div className="step-nav">
         <Button variant="secondary" onClick={prevStep}>KEMBALI</Button>
         <Button fullWidth disabled={!dailyTarget} onClick={nextStep}>LANJUTKAN</Button>
       </div>

@@ -5,6 +5,35 @@
   align-items: center;
   padding: 32px 0 60px;
   position: relative;
+  min-height: 500px;
+}
+
+/* ── Zigzag SVG Connector ── */
+.path-connector {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Tech Floating Icons ── */
+.tech-float {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.2;
+  animation: tech-float 3.5s ease-in-out infinite;
+}
+.tech-float svg {
+  width: 58px;
+  height: 58px;
+  display: block;
+}
+@keyframes tech-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.15; }
+  50% { transform: translateY(-8px) rotate(6deg); opacity: 0.3; }
 }
 
 /* ── Node Row ── */
@@ -13,19 +42,32 @@
   flex-direction: column;
   align-items: center;
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   z-index: 2;
 }
 .skillpath-node:last-child {
   margin-bottom: 0;
 }
 
-/* ── Wave positions ── */
-.skillpath-node--pos0 { transform: translateX(20px); }
-.skillpath-node--pos1 { transform: translateX(-35px); }
-.skillpath-node--pos2 { transform: translateX(-55px); }
-.skillpath-node--pos3 { transform: translateX(-35px); }
-.skillpath-node--pos4 { transform: translateX(20px); }
+/* ── Wave positions (more dramatic zigzag) ── */
+.skillpath-node--pos0 { transform: translateX(40px); }
+.skillpath-node--pos1 { transform: translateX(-30px); }
+.skillpath-node--pos2 { transform: translateX(-60px); }
+.skillpath-node--pos3 { transform: translateX(-30px); }
+.skillpath-node--pos4 { transform: translateX(40px); }
+
+/* ── Node label ── */
+.skillpath-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+  white-space: nowrap;
+  text-align: center;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* ── Clickable area ── */
 .skillpath-clickable {
@@ -47,10 +89,10 @@
   position: relative;
 }
 
-/* ── Active (100px container, 68px button, ring) ── */
+/* ── Active (120px container, 88px button, ring) ── */
 .skillpath-icon-wrap--active {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
 }
 
 .skillpath-ring {
@@ -63,8 +105,8 @@
 }
 
 .skillpath-active-btn {
-  width: 68px;
-  height: 68px;
+  width: 88px;
+  height: 88px;
   border-radius: 50%;
   background: #58cc02;
   border: none;
@@ -82,36 +124,36 @@
   transform: scale(1.03);
 }
 .skillpath-active-btn img {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: block;
 }
 
-/* ── Locked / Milestone (90px) ── */
+/* ── Locked / Milestone (110px) ── */
 .skillpath-icon-wrap--locked,
 .skillpath-icon-wrap--milestone {
-  width: 90px;
-  height: 90px;
+  width: 110px;
+  height: 110px;
   background: #3d4a56;
   box-shadow: 0 6px 0 #2a3540;
 }
 .skillpath-locked-icon {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: block;
   filter: brightness(0.7);
 }
 .skillpath-icon-wrap--milestone svg {
-  width: 32px;
-  height: 36px;
+  width: 40px;
+  height: 44px;
   display: block;
   filter: brightness(0.7);
 }
 
-/* ── Chest (110px) ── */
+/* ── Chest (130px) ── */
 .skillpath-icon-wrap--chest {
-  width: 110px;
-  height: 110px;
+  width: 130px;
+  height: 130px;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -121,7 +163,7 @@
   transform: scale(1.03);
 }
 .skillpath-icon-wrap--chest img {
-  width: 82px;
+  width: 100px;
   height: auto;
   display: block;
   filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.35));
@@ -156,37 +198,6 @@
   border-right: 6px solid transparent;
   border-top: 7px solid var(--color-primary);
   margin-top: -1px;
-}
-
-/* ── Capybara Mascot ── */
-.skillpath-capybara {
-  position: absolute;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.skillpath-capybara--right {
-  right: -90px;
-  top: 10px;
-}
-.skillpath-capybara-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  filter: drop-shadow(0 4px 0 #1a2530);
-}
-.skillpath-capybara-body svg {
-  width: 44px;
-  height: 44px;
-}
-.skillpath-capybara-base {
-  width: 30px;
-  height: 10px;
-  border-radius: 50%;
-  background: #2a3540;
-  box-shadow: 0 4px 0 #1a2530;
-  margin-top: -4px;
 }
 
 /* ── Back Button ── */
