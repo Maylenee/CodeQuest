@@ -1,27 +1,43 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-primary: #131f24;
-  --color-bg-secondary: #0f1720;
-  --color-bg-card: #1f2c33;
-  --color-bg-card-hover: #26353d;
-  --color-border: #37464f;
-  --color-border-light: #4a5a65;
+  --color-bg-primary: #f0f2f5;
+  --color-bg-secondary: #ffffff;
+  --color-bg-card: #ffffff;
+  --color-bg-card-hover: #f5f7fa;
+  --color-border: #d1d5db;
+  --color-border-light: #e5e7eb;
   --color-primary: #58cc02;
   --color-primary-hover: #4ab801;
-  --color-primary-light: rgba(88, 204, 2, 0.15);
+  --color-primary-light: rgba(88, 204, 2, 0.1);
   --color-secondary: #1cb0f6;
-  --color-secondary-light: rgba(28, 176, 246, 0.15);
+  --color-secondary-light: rgba(28, 176, 246, 0.1);
   --color-accent-yellow: #ffc800;
   --color-accent-red: #ff4b4b;
   --color-accent-purple: #ce82ff;
   --color-accent-orange: #ff9600;
-  --color-text-primary: #f0f4f8;
-  --color-text-secondary: #a0b3c0;
-  --color-text-muted: #6a7f8c;
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #9ca3af;
   --color-success: #58cc02;
   --color-error: #ff4b4b;
   --color-warning: #ffc800;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-primary: #131f24;
+    --color-bg-secondary: #0f1720;
+    --color-bg-card: #1f2c33;
+    --color-bg-card-hover: #26353d;
+    --color-border: #37464f;
+    --color-border-light: #4a5a65;
+    --color-primary-light: rgba(88, 204, 2, 0.15);
+    --color-secondary-light: rgba(28, 176, 246, 0.15);
+    --color-text-primary: #f0f4f8;
+    --color-text-secondary: #a0b3c0;
+    --color-text-muted: #6a7f8c;
+  }
 }
 
 * {

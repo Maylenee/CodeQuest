@@ -10,7 +10,8 @@ import { Sidebar } from "./Sidebar";
 import { LearningPath } from "./LearningPath";
 import { LessonPage } from "../questions/LessonPage";
 import { useGameStore } from "../../lib/store";
-import { userGet, userUpdate, leaderboardGet, seedGet, referenceGet } from "../../api";
+import { getTrackContent } from "../../lib/trackContent";
+import { userGet, userUpdate, leaderboardGet, referenceGet } from "../../api";
 import "./LearnPage.css";
 
 const shopItems = [
@@ -20,50 +21,9 @@ const shopItems = [
   { id: "hint_unlock", icon: Lightbulb, name: "Hint Pack", desc: "5 hint tambahan", price: 20, color: "var(--color-accent-yellow)" },
 ];
 
-const REFERENCE_FALLBACK = [
-  {
-    lessonId: "l1", title: "Apa itu Python?",
-    sections: [
-      { type: "text", content: "Python adalah bahasa pemrograman tingkat tinggi yang dibuat oleh Guido van Rossum dan pertama kali dirilis pada tahun 1991. Python dirancang dengan filosofi yang menekankan keterbacaan kode, terutama dengan penggunaan spasi putih (indentasi) yang signifikan." },
-      { type: "text", content: "Python dikenal sebagai bahasa yang mudah dipelajari karena sintaksnya yang sederhana dan mirip dengan bahasa Inggris biasa." },
-      { type: "code", caption: "Program Python pertama kamu:", code: "print(\"Hello, World!\")" },
-      { type: "text", content: "Python bersifat interpreted, artinya kode Python dijalankan baris per baris tanpa perlu dikompilasi terlebih dahulu." },
-      { type: "bullet", items: ["Bahasa tingkat tinggi (mudah dibaca dan ditulis)", "Interpreted (dijalankan langsung tanpa kompilasi)", "Multi-platform (Windows, Mac, Linux)"] }
-    ]
-  },
-  {
-    lessonId: "l2", title: "Variabel & Tipe Data",
-    sections: [
-      { type: "text", content: "Variabel adalah tempat untuk menyimpan data di memori komputer. Di Python, kamu tidak perlu mendeklarasikan tipe data secara eksplisit." },
-      { type: "code", caption: "Membuat variabel di Python:", code: "nama = \"Budi\"        # string\numur = 17            # integer\ntinggi = 1.75        # float\nsiswa = True         # boolean" },
-      { type: "table", columns: ["Tipe", "Contoh", "Penjelasan"], rows: [["int", "17, -5", "Bilangan bulat"], ["float", "3.14", "Bilangan desimal"], ["str", "\"Halo\"", "Teks"], ["bool", "True/False", "Nilai kebenaran"]] }
-    ]
-  },
-  {
-    lessonId: "l3", title: "Strings & Manipulasi",
-    sections: [
-      { type: "text", content: "String adalah tipe data untuk menyimpan teks. Bisa dibuat dengan kutip tunggal atau ganda." },
-      { type: "code", caption: "Operasi string:", code: "a = \"Halo \"\nb = \"Dunia\"\nhasil = a + b          # concat\npanjang = len(hasil)  # panjang string\npotong = hasil[0:4]   # slicing" },
-      { type: "table", columns: ["Method", "Contoh", "Hasil"], rows: [["upper()", "\"halo\".upper()", "\"HALO\""], ["lower()", "\"HALO\".lower()", "\"halo\""], ["split()", "\"a,b\".split(\",\")", "[\"a\",\"b\"]"]] }
-    ]
-  },
-  {
-    lessonId: "l5", title: "If-Else & Percabangan",
-    sections: [
-      { type: "text", content: "Percabangan memungkinkan program mengambil keputusan berdasarkan kondisi tertentu." },
-      { type: "code", caption: "Struktur if-else:", code: "nilai = 85\nif nilai >= 90:\n    print(\"A\")\nelif nilai >= 75:\n    print(\"B\")\nelse:\n    print(\"C\")" },
-      { type: "table", columns: ["Operator", "Arti"], rows: [["==", "Sama dengan"], ["!=", "Tidak sama"], [">", "Lebih besar"], ["<", "Lebih kecil"]] }
-    ]
-  },
-  {
-    lessonId: "l6", title: "For Loop",
-    sections: [
-      { type: "text", content: "Perulangan digunakan untuk mengulang blok kode beberapa kali." },
-      { type: "code", caption: "For loop:", code: "for i in range(5):\n    print(i)\n# 0 1 2 3 4" },
-      { type: "code", caption: "Iterasi list:", code: "buah = [\"apel\", \"mangga\"]\nfor b in buah:\n    print(b)" }
-    ]
-  }
-];
+function getFallbackRefs(track: string) {
+  return getTrackContent(track).references;
+}
 
 function Modal({ open, onClose, title, children }: { open: boolean; onClose: () => void; title?: string; children: React.ReactNode }) {
   if (!open) return null;
@@ -450,6 +410,7 @@ function MoreSection() {
 function AlphabetSection({ onOpenLesson }: { onOpenLesson: (lessonId: string) => void }) {
   const [refs, setRefs] = useState<any[]>([]);
   const [openRef, setOpenRef] = useState<string | null>(null);
+  const selectedTrack = useGameStore((s) => s.selectedTrack);
 
   useEffect(() => {
     async function load() {
@@ -460,10 +421,10 @@ function AlphabetSection({ onOpenLesson }: { onOpenLesson: (lessonId: string) =>
           return;
         }
       } catch {}
-      setRefs(REFERENCE_FALLBACK);
+      setRefs(getFallbackRefs(selectedTrack));
     }
     load();
-  }, []);
+  }, [selectedTrack]);
 
   const activeRef = refs.find((r) => r.lessonId === openRef);
 
@@ -567,15 +528,19 @@ function AlphabetSection({ onOpenLesson }: { onOpenLesson: (lessonId: string) =>
   );
 }
 
-export function LearnPage() {
+export function LearnPage({ onBackToSelection }: { onBackToSelection?: () => void }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [activeLesson, setActiveLesson] = useState<string | null>(null);
-  const { streak, hearts, gems, loadFromUser, xp } = useGameStore();
+  const { streak, hearts, gems, loadFromUser, xp, userName, selectedTrack } = useGameStore();
   const [loading, setLoading] = useState(true);
   const [showGuide, setShowGuide] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [profileName, setProfileName] = useState("");
+  const [profileEmail, setProfileEmail] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -583,11 +548,41 @@ export function LearnPage() {
       try {
         const data = await userGet(uid);
         if (data.user) loadFromUser(data.user);
-      } catch { /* fallback */ }
+      } catch {
+        const storedTrack = localStorage.getItem("codequest_track");
+        if (storedTrack) useGameStore.getState().setSelectedTrack(storedTrack);
+        const storedSkill = localStorage.getItem("codequest_skillLevel");
+        if (storedSkill) useGameStore.getState().setSkillLevel(Number(storedSkill));
+      }
       setLoading(false);
     }
     load();
   }, [loadFromUser]);
+
+  const handleCreateProfile = async () => {
+    const uid = localStorage.getItem("codequest_userId") || "user-default";
+    try {
+      const res = await userUpdate({ id: uid, name: profileName, email: profileEmail });
+      if (res.user) loadFromUser(res.user);
+      else loadFromUser({ id: uid, name: profileName, email: profileEmail });
+    } catch {
+      loadFromUser({ id: uid, name: profileName, email: profileEmail });
+    }
+    setShowProfile(false);
+    setProfileName("");
+    setProfileEmail("");
+  };
+
+  const handleLogin = async () => {
+    const uid = localStorage.getItem("codequest_userId") || "user-default";
+    try {
+      const data = await userGet(uid);
+      if (data.user) loadFromUser(data.user);
+    } catch {}
+    setShowLogin(false);
+    setLoginEmail("");
+    setLoginPassword("");
+  };
 
   if (activeLesson) {
     return <LessonPage lessonId={activeLesson} onBack={() => setActiveLesson(null)} />;
@@ -611,7 +606,7 @@ export function LearnPage() {
             <div className="header-card-content">
               <div className="header-card-top">
                 <div className="header-card-left">
-                  <button className="header-back" onClick={() => window.history.back()}>
+                  <button className="header-back" onClick={() => onBackToSelection?.()}>
                     <ArrowLeft />
                   </button>
                   <span className="header-breadcrumb">BAGIAN 1, UNIT 1</span>
@@ -623,8 +618,8 @@ export function LearnPage() {
                   BUKU PANDUAN
                 </button>
               </div>
-              <h1 className="header-title">Python Dasar</h1>
-              <p className="header-sub">Dasar-dasar pemrograman Python untuk pemula</p>
+              <h1 className="header-title">{getTrackContent(selectedTrack).name}</h1>
+              <p className="header-sub">{getTrackContent(selectedTrack).desc}</p>
             </div>
           </div>
 
@@ -649,13 +644,13 @@ export function LearnPage() {
 
         <div className="learn-scroll">
           <div className="learn-scroll-inner">
-            {activeSection === "home" && <LearningPath />}
-            {activeSection === "alphabet" && <AlphabetSection onOpenLesson={setActiveLesson} />}
-            {activeSection === "leaderboard" && <LeaderboardSection />}
-            {activeSection === "missions" && <MissionsSection />}
-            {activeSection === "shop" && <ShopSection />}
-            {activeSection === "profile" && <ProfileSection />}
-            {activeSection === "more" && <MoreSection />}
+            <div style={{ display: activeSection !== "home" ? "none" : undefined }}><LearningPath /></div>
+            <div style={{ display: activeSection !== "alphabet" ? "none" : undefined }}><AlphabetSection onOpenLesson={setActiveLesson} /></div>
+            <div style={{ display: activeSection !== "leaderboard" ? "none" : undefined }}><LeaderboardSection /></div>
+            <div style={{ display: activeSection !== "missions" ? "none" : undefined }}><MissionsSection /></div>
+            <div style={{ display: activeSection !== "shop" ? "none" : undefined }}><ShopSection /></div>
+            <div style={{ display: activeSection !== "profile" ? "none" : undefined }}><ProfileSection /></div>
+            <div style={{ display: activeSection !== "more" ? "none" : undefined }}><MoreSection /></div>
           </div>
         </div>
       </div>
@@ -729,6 +724,7 @@ export function LearnPage() {
           </div>
         </div>
 
+        {userName === "Pengguna" && (
         <div className="cta-card">
           <div className="cta-avatar">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -742,6 +738,7 @@ export function LearnPage() {
             <button className="cta-btn cta-btn--secondary" onClick={() => setShowLogin(true)}>MASUK</button>
           </div>
         </div>
+        )}
       </div>
 
       <Modal open={showGuide} onClose={() => setShowGuide(false)} title="Buku Panduan">
@@ -766,13 +763,13 @@ export function LearnPage() {
         <div className="form-stack">
           <div className="form-group">
             <label className="form-label">Nama</label>
-            <input className="form-input" placeholder="Masukkan nama kamu" />
+            <input className="form-input" placeholder="Masukkan nama kamu" value={profileName} onChange={(e) => setProfileName(e.target.value)} />
           </div>
           <div className="form-group">
             <label className="form-label">Email</label>
-            <input className="form-input" placeholder="Masukkan email" type="email" />
+            <input className="form-input" placeholder="Masukkan email" type="email" value={profileEmail} onChange={(e) => setProfileEmail(e.target.value)} />
           </div>
-          <button className="form-submit form-submit--primary">SIMPAN</button>
+          <button className="form-submit form-submit--primary" onClick={handleCreateProfile}>SIMPAN</button>
         </div>
       </Modal>
 
@@ -780,13 +777,13 @@ export function LearnPage() {
         <div className="form-stack">
           <div className="form-group">
             <label className="form-label">Email</label>
-            <input className="form-input" placeholder="Masukkan email" type="email" />
+            <input className="form-input" placeholder="Masukkan email" type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
           </div>
           <div className="form-group">
             <label className="form-label">Kata Sandi</label>
-            <input className="form-input" placeholder="Masukkan kata sandi" type="password" />
+            <input className="form-input" placeholder="Masukkan kata sandi" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
           </div>
-          <button className="form-submit form-submit--secondary">MASUK</button>
+          <button className="form-submit form-submit--secondary" onClick={handleLogin}>MASUK</button>
           <p className="form-footer">
             Belum punya akun?{" "}
             <button className="form-link" onClick={() => { setShowLogin(false); setShowProfile(true); }}>

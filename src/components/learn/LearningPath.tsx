@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { LessonPage } from "../questions/LessonPage";
 import { Code2, Monitor, Cog, Terminal, BrainCircuit, Plug, Wifi, Database } from "lucide-react";
+import { useGameStore } from "../../lib/store";
+import { getTrackContent } from "../../lib/trackContent";
 import "./LearningPath.css";
 
 type NodeData = {
@@ -15,26 +17,19 @@ type Node_ = NodeData & {
   progress: number;
 };
 
-const nodeMeta: NodeData[] = [
-  { id: "l1", title: "Apa itu Python?", order: 1, type: "lesson" },
-  { id: "l2", title: "Variabel & Tipe Data", order: 2, type: "lesson" },
-  { id: "l3", title: "Bonus Challenge", order: 3, type: "chest" },
-  { id: "l4", title: "Strings & Manipulasi", order: 4, type: "lesson" },
-  { id: "l5", title: "Unit 1 Selesai!", order: 5, type: "milestone" },
-];
-
-function getNodes() {
+function getNodes(track: string, skillLevel: number) {
+  const meta = getTrackContent(track).nodes;
   const uid = localStorage.getItem("codequest_userId") || "user-default";
   let stored: { lessonId: string; status: string }[] = [];
   try {
     stored = JSON.parse(localStorage.getItem(`codequest_progress_${uid}`) || "[]");
   } catch {}
   const completedIds = new Set(stored.filter((p) => p.status === "completed").map((p) => p.lessonId));
+  const autoCompleteCount = skillLevel >= 4 ? 3 : skillLevel >= 3 ? 2 : skillLevel >= 2 ? 1 : 0;
   let foundActive = false;
-  return nodeMeta.map((m) => {
-    if (completedIds.has(m.id)) {
-      return { ...m, status: "completed" as const, progress: 100 };
-    }
+  return meta.map((m, i) => {
+    if (completedIds.has(m.id)) return { ...m, status: "completed" as const, progress: 100 };
+    if (i < autoCompleteCount) return { ...m, status: "completed" as const, progress: 100 };
     if (!foundActive) {
       foundActive = true;
       return { ...m, status: "in_progress" as const, progress: 0 };
@@ -91,26 +86,11 @@ function TechFloatingIcons() {
   );
 }
 
-function ProgressRing({ progress }: { progress: number }) {
-  const r = 54;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - (circ * Math.min(progress, 100)) / 100;
+function Checkmark() {
   return (
-    <svg className="skillpath-ring" viewBox="0 0 120 120">
-      <circle cx="60" cy="60" r={r} fill="none" stroke="#3a4750" strokeWidth="6" />
-      <circle
-        cx="60"
-        cy="60"
-        r={r}
-        fill="none"
-        stroke="#58cc02"
-        strokeWidth="6"
-        strokeLinecap="round"
-        strokeDasharray={circ}
-        strokeDashoffset={offset}
-        transform="rotate(-90 60 60)"
-        style={{ transition: "stroke-dashoffset 0.5s ease" }}
-      />
+    <svg className="skillpath-checkmark" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" fill="#58cc02" />
+      <path d="M7 12.5 L10.5 16 L17 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -118,10 +98,19 @@ function ProgressRing({ progress }: { progress: number }) {
 function NodeIcon({ node }: { node: Node_ }) {
   const isActive = node.status === "in_progress";
   const isLocked = node.status === "locked";
+  const isCompleted = node.status === "completed";
   const isChest = node.type === "chest";
   const isMilestone = node.type === "milestone";
 
   if (isChest) {
+    if (isCompleted) {
+      return (
+        <div className="skillpath-icon-wrap skillpath-icon-wrap--chest-done">
+          <img draggable={false} src="https://d35aaqx5ub95lt.cloudfront.net/images/path/0ae912c0b7a66354a850e6733ef653cb.svg" alt="" />
+          <Checkmark />
+        </div>
+      );
+    }
     return (
       <div className="skillpath-icon-wrap skillpath-icon-wrap--chest">
         <img draggable={false} src="https://d35aaqx5ub95lt.cloudfront.net/images/path/0ae912c0b7a66354a850e6733ef653cb.svg" alt="" />
@@ -130,6 +119,14 @@ function NodeIcon({ node }: { node: Node_ }) {
   }
 
   if (isMilestone) {
+    if (isCompleted) {
+      return (
+        <div className="skillpath-icon-wrap skillpath-icon-wrap--milestone-done">
+          <TrophySvg />
+          <Checkmark />
+        </div>
+      );
+    }
     return (
       <div className="skillpath-icon-wrap skillpath-icon-wrap--milestone">
         <TrophySvg />
@@ -140,10 +137,20 @@ function NodeIcon({ node }: { node: Node_ }) {
   if (isActive) {
     return (
       <div className="skillpath-icon-wrap skillpath-icon-wrap--active">
-        <ProgressRing progress={node.progress} />
         <button className="skillpath-active-btn" aria-label="Lesson">
           <img draggable={false} src="https://d35aaqx5ub95lt.cloudfront.net/images/path/icons/ef9c771afdb674f0ff82fae25c6a7b0a.svg" alt="" />
         </button>
+      </div>
+    );
+  }
+
+  if (isCompleted) {
+    return (
+      <div className="skillpath-icon-wrap skillpath-icon-wrap--completed">
+        <div className="skillpath-completed-btn">
+          <img draggable={false} src="https://d35aaqx5ub95lt.cloudfront.net/images/path/icons/ef9c771afdb674f0ff82fae25c6a7b0a.svg" alt="" />
+        </div>
+        <Checkmark />
       </div>
     );
   }
@@ -156,8 +163,10 @@ function NodeIcon({ node }: { node: Node_ }) {
 }
 
 export function LearningPath() {
+  const selectedTrack = useGameStore((s) => s.selectedTrack);
+  const skillLevel = useGameStore((s) => s.skillLevel);
   const [activeLesson, setActiveLesson] = useState<string | null>(null);
-  const [nodes, setNodes] = useState<Node_[]>(() => getNodes());
+  const [nodes, setNodes] = useState<Node_[]>(() => getNodes(selectedTrack, skillLevel));
 
   if (activeLesson) {
     return (
@@ -165,7 +174,7 @@ export function LearningPath() {
         lessonId={activeLesson}
         onBack={() => {
           setActiveLesson(null);
-          setNodes(getNodes());
+          setNodes(getNodes(selectedTrack, skillLevel));
         }}
       />
     );

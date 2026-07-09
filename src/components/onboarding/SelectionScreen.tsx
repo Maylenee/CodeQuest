@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, Code, Globe, FileJson, Brain, Database, GitBranch, Layout, Smartphone } from "lucide-react";
-import { Mascot } from "../ui/Mascot";
+import { CodeTagMascot } from "../ui/CodeTag";
 import "./Onboarding.css";
 
 const tracks = [
@@ -22,7 +22,7 @@ export function SelectionScreen({ onSelect }: { onSelect: (track: string) => voi
     <div className="sel-landing">
       <header className="sel-header">
         <div className="sel-header-left">
-          <Mascot size="sm" expression="happy" />
+          <CodeTagMascot size="sm" />
           <span className="sel-header-logo">CodeQuest</span>
         </div>
         <div className="sel-lang-wrap">

@@ -1,3 +1,48 @@
+export const JS_QUESTIONS_FALLBACK: Record<string, { lesson: { title: string }, questions: any[] }> = {
+  l1: {
+    lesson: { title: "Apa itu JavaScript?" },
+    questions: [
+      { id: "q1", type: "mcq", prompt: "Siapakah pencipta bahasa pemrograman JavaScript?", content: { options: ["Guido van Rossum", "Brendan Eich", "James Gosling", "Dennis Ritchie"], correctAnswer: 1, hints: ["JavaScript dibuat dalam 10 hari oleh seorang engineer di Netscape"] }, xpReward: 10 },
+      { id: "q2", type: "mcq", prompt: "JavaScript adalah bahasa pemrograman yang bersifat...", content: { options: ["Compiled", "Interpreted", "Markup language", "Query language"], correctAnswer: 1, hints: ["JavaScript dijalankan baris per baris oleh engine browser"] }, xpReward: 10 },
+      { id: "q3", type: "predict_output", prompt: "Apa output dari kode JavaScript berikut?", content: { code: 'console.log("Hello, JavaScript!")', options: ["Hello, JavaScript!", "hello, javascript!", "Error", "Tidak ada output"], correctAnswer: 0, hints: ["console.log() akan mencetak argumen ke console"] }, xpReward: 10 },
+    ]
+  },
+  l2: {
+    lesson: { title: "Variabel & Tipe Data" },
+    questions: [
+      { id: "q4", type: "mcq", prompt: 'Tipe data apa yang dimiliki oleh variabel `let x = "Halo"`?', content: { options: ["number", "string", "boolean", "object"], correctAnswer: 1, hints: ["Tanda kutip menandakan bahwa nilai tersebut adalah string/teks"] }, xpReward: 10 },
+      { id: "q5", type: "fill_blank", prompt: "Lengkapi kode berikut untuk membuat variabel `umur` dengan nilai 17:", content: { starterCode: "let ____ = 17;", blanks: [{ id: "b1", answer: "umur" }], hints: ["Gunakan keyword let untuk mendeklarasikan variabel"] }, xpReward: 10 },
+      { id: "q6", type: "mcq", prompt: "Manakah dari berikut ini yang BUKAN termasuk tipe data primitif di JavaScript?", content: { options: ["string", "number", "char", "boolean"], correctAnswer: 2, hints: ["JavaScript tidak punya tipe data char terpisah"] }, xpReward: 10 },
+    ]
+  },
+  l3: {
+    lesson: { title: "String & Manipulasi" },
+    questions: [
+      { id: "q7", type: "fill_blank", prompt: "Lengkapi kode untuk menggabungkan dua string:", content: { starterCode: 'let sapa = "Halo ";\nlet nama = "Dunia";\nlet hasil = sapa ____ nama;\nconsole.log(hasil);', blanks: [{ id: "b1", answer: "+" }], hints: ["Gunakan operator + untuk menggabungkan (concatenate) string"] }, xpReward: 10 },
+      { id: "q8", type: "predict_output", prompt: "Apa output dari kode berikut?", content: { code: 'let nama = "JavaScript";\nconsole.log(nama.length);', options: ["8", "9", "10", "11"], correctAnswer: 2, hints: [".length mengembalikan panjang string, 'JavaScript' memiliki 10 karakter"] }, xpReward: 10 },
+    ]
+  },
+  l4: {
+    lesson: { title: "Proyek: Program Pertamamu" },
+    questions: [
+      { id: "q9", type: "fill_blank", prompt: "Buat program yang mencetak nama kamu:", content: { starterCode: 'let nama = "____";\nconsole.log("Halo, " + nama);', blanks: [{ id: "b1", answer: "CodeQuest" }], hints: ["Isi dengan nama yang ingin kamu cetak"] }, xpReward: 20 },
+    ]
+  },
+  l5: {
+    lesson: { title: "If-Else & Percabangan" },
+    questions: [
+      { id: "q10", type: "fill_blank", prompt: "Lengkapi kode untuk mengecek apakah suatu angka genap:", content: { starterCode: "let angka = 10;\nif (angka % 2 ____ 0) {\n  console.log(\"Genap\");\n}", blanks: [{ id: "b1", answer: "===" }], hints: ["Gunakan operator strict equality ==="] }, xpReward: 10 },
+      { id: "q11", type: "mcq", prompt: "Apa yang akan dicetak oleh kode berikut?\n\nlet x = 10;\nif (x > 5) {\n  console.log(\"Besar\");\n} else {\n  console.log(\"Kecil\");\n}", content: { options: ["Besar", "Kecil", "Error", "Tidak ada output"], correctAnswer: 0, hints: ["10 > 5 adalah true, jadi blok if akan dijalankan"] }, xpReward: 10 },
+    ]
+  },
+  l6: {
+    lesson: { title: "For Loop" },
+    questions: [
+      { id: "q12", type: "predict_output", prompt: "Apa output dari kode berikut?", content: { code: "let total = 0;\nfor (let i = 1; i <= 3; i++) {\n  total += i;\n}\nconsole.log(total);", options: ["3", "4", "6", "7"], correctAnswer: 2, hints: ["Loop dari 1 sampai 3, total = 1+2+3 = 6"] }, xpReward: 10 },
+    ]
+  },
+};
+
 export const QUESTIONS_FALLBACK: Record<string, { lesson: { title: string }, questions: any[] }> = {
   l1: {
     lesson: { title: "Apa itu Python?" },

@@ -55,5 +55,5 @@ export default function App() {
     );
   }
 
-  return <LearnPage />;
+  return <LearnPage onBackToSelection={() => { localStorage.removeItem("codequest_onboarded"); setPhase("selection"); }} />;
 }

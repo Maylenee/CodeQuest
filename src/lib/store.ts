@@ -58,6 +58,8 @@ interface GameState {
   showConfetti: boolean;
   userId: string;
   userName: string;
+  selectedTrack: string;
+  skillLevel: number;
   setXp: (xp: number) => void;
   addXp: (amount: number) => void;
   setLevel: (level: number) => void;
@@ -68,6 +70,8 @@ interface GameState {
   setShowConfetti: (show: boolean) => void;
   setUserId: (id: string) => void;
   setUserName: (name: string) => void;
+  setSelectedTrack: (track: string) => void;
+  setSkillLevel: (level: number) => void;
   loadFromUser: (user: any) => void;
 }
 
@@ -81,6 +85,8 @@ export const useGameStore = create<GameState>((set) => ({
   showConfetti: false,
   userId: "user-default",
   userName: "Pengguna",
+  selectedTrack: "python",
+  skillLevel: 1,
   setXp: (xp) => set({ xp }),
   addXp: (amount) => set((s) => ({ xp: s.xp + amount })),
   setLevel: (level) => set({ level }),
@@ -91,6 +97,8 @@ export const useGameStore = create<GameState>((set) => ({
   setShowConfetti: (show) => set({ showConfetti: show }),
   setUserId: (id) => set({ userId: id }),
   setUserName: (name) => set({ userName: name }),
+  setSelectedTrack: (track) => set({ selectedTrack: track }),
+  setSkillLevel: (level) => set({ skillLevel: level }),
   loadFromUser: (user) =>
     set({
       xp: user.xp || 0,
@@ -101,5 +109,7 @@ export const useGameStore = create<GameState>((set) => ({
       league: user.league || "bronze",
       userId: user.id || "user-default",
       userName: user.name || "Pengguna",
+      selectedTrack: user.selectedTrack || "python",
+      skillLevel: user.skillLevel || 1,
     }),
 }));

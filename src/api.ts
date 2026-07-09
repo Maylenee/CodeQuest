@@ -69,12 +69,14 @@ export const submissionCreate = (data: {
 export const leaderboardGet = () => cf("/leaderboard/get");
 
 // Questions
-export const questionsGet = async (lessonId: string) => {
+export const questionsGet = async (lessonId: string, track?: string) => {
   try {
     return await cf(`/questions/get${qs({ lessonId })}`);
   } catch {
-    const { QUESTIONS_FALLBACK } = await import("./lib/questionsData");
-    const fallback = (QUESTIONS_FALLBACK as any)[lessonId];
+    const { getTrackContent } = await import("./lib/trackContent");
+    const trackId = track || "python";
+    const qs = getTrackContent(trackId).questions;
+    const fallback = qs[lessonId];
     if (fallback) return fallback;
     throw new Error("No questions available");
   }

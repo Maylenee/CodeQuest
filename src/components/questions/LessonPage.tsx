@@ -34,7 +34,8 @@ export function LessonPage({ lessonId, onBack }: LessonPageProps) {
   useEffect(() => {
     async function load() {
       try {
-        const data = await questionsGet(lessonId);
+        const track = useGameStore.getState().selectedTrack;
+        const data = await questionsGet(lessonId, track);
         setQuestions(data.questions || []);
         setLessonTitle(data.lesson?.title || "");
       } catch (e) {

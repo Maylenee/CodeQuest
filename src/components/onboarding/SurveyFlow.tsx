@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { ArrowLeft, ChevronDown, Search, Music, Users, Share2, Youtube, BookOpen, Briefcase, GraduationCap, HeartHandshake, Laptop, Trophy, MoreHorizontal, Monitor, Brain, Flame, Bell, BellOff, X, Pencil } from "lucide-react";
-import { Mascot } from "../ui/Mascot";
+import { CodeTagMascot } from "../ui/CodeTag";
 import { cn } from "../../lib/utils";
 import { userInit } from "../../api";
 import "./Onboarding.css";
@@ -16,11 +16,6 @@ const stepMessages = [
   "Minta izin buat ngirim pengingat belajar, ya!",
   "Mau mulai dari mana?",
   "Oke, siap! Ini rekomendasi awal buat kamu.",
-];
-
-const mascotExpressions: Array<"normal" | "happy" | "thinking" | "celebrate"> = [
-  "happy", "thinking", "thinking", "happy",
-  "happy", "normal", "thinking", "celebrate",
 ];
 
 const sources = [
@@ -81,6 +76,8 @@ export function SurveyFlow({ onComplete, selectedTrack }: { onComplete: () => vo
     } else {
       const userId = `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       localStorage.setItem("codequest_userId", userId);
+      localStorage.setItem("codequest_track", selectedTrack);
+      localStorage.setItem("codequest_skillLevel", String(skillLevel));
       userInit({
         id: userId,
         name: "Pengguna",
@@ -144,7 +141,7 @@ export function SurveyFlow({ onComplete, selectedTrack }: { onComplete: () => vo
       <div className="onboard-body">
         <div className="onboard-chat">
           <div className="relative shrink-0">
-            <Mascot size="md" expression={mascotExpressions[step]} />
+            <CodeTagMascot size="md" />
             <div className="absolute -right-1 bottom-1">
               <Pencil className="w-4 h-4 text-[var(--color-accent-orange)] rotate-45" />
             </div>
@@ -304,7 +301,7 @@ export function SurveyFlow({ onComplete, selectedTrack }: { onComplete: () => vo
             {step === 7 && (
               <div className="flex flex-col items-center text-center pt-4">
                 <div className="confirm-mascot">
-                  <Mascot size="lg" expression="celebrate" />
+                  <CodeTagMascot size="lg" />
                   <Pencil className="confirm-mascot-pencil" />
                 </div>
                 <div className="onboard-bubble" style={{ maxWidth: "384px", margin: "0 auto" }}>

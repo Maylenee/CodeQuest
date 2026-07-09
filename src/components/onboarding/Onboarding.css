@@ -142,18 +142,23 @@
   text-align: center;
 }
 
-/* ── Skill Bars ── */
+/* ── Skill Bars (signal) ── */
 .skill-bars {
   display: flex;
-  gap: 4px;
+  align-items: flex-end;
+  gap: 3px;
   flex-shrink: 0;
+  height: 24px;
 }
 .skill-bar {
-  width: 12px;
-  height: 8px;
-  border-radius: 4px;
+  width: 8px;
+  border-radius: 2px 2px 0 0;
   transition: background 0.2s;
 }
+.skill-bar:nth-child(1) { height: 8px; }
+.skill-bar:nth-child(2) { height: 13px; }
+.skill-bar:nth-child(3) { height: 18px; }
+.skill-bar:nth-child(4) { height: 24px; }
 .skill-bar--filled {
   background: var(--color-primary);
 }
@@ -626,7 +631,7 @@
    ═══════════════════════════════════════════ */
 .sel-landing {
   min-height: 100vh;
-  background: #fff;
+  background: var(--color-bg-primary);
   display: flex;
   flex-direction: column;
 }
@@ -635,7 +640,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--color-border-light);
 }
 .sel-header-left {
   display: flex;
@@ -645,7 +650,7 @@
 .sel-header-logo {
   font-size: 18px;
   font-weight: 800;
-  color: #58cc02;
+  color: var(--color-primary);
   letter-spacing: -0.02em;
 }
 .sel-lang-btn {
@@ -655,8 +660,8 @@
   padding: 6px 12px;
   font-size: 11px;
   font-weight: 700;
-  color: #9ca3af;
-  background: #f3f4f6;
+  color: var(--color-text-muted);
+  background: var(--color-bg-card-hover);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -665,15 +670,15 @@
   transition: background 0.2s;
   font-family: inherit;
 }
-.sel-lang-btn:hover { background: #e5e7eb; }
+.sel-lang-btn:hover { background: var(--color-border-light); }
 .sel-lang-btn svg { width: 12px; height: 12px; }
 .sel-lang-dropdown {
   position: absolute;
   right: 0;
   top: calc(100% + 4px);
   width: 96px;
-  background: #fff;
-  border: 1px solid #e5e5e5;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   overflow: hidden;
@@ -688,10 +693,10 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #3c3c3c;
+  color: var(--color-text-primary);
   font-family: inherit;
 }
-.sel-lang-option:hover { background: #f7f7f7; }
+.sel-lang-option:hover { background: var(--color-bg-card-hover); }
 .sel-main {
   flex: 1;
   display: flex;
@@ -703,14 +708,14 @@
   font-size: 40px;
   line-height: 1.1;
   font-weight: 800;
-  color: #3c3c3c;
+  color: var(--color-text-primary);
   text-align: center;
   margin-top: 64px;
   margin-bottom: 16px;
 }
 .sel-main-sub {
   font-size: 16px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   text-align: center;
   margin-bottom: 48px;
   max-width: 448px;
@@ -735,20 +740,20 @@
   text-align: center;
   padding: 24px;
   border-radius: 16px;
-  border: 2px solid #e5e5e5;
-  background: #fff;
+  border: 2px solid var(--color-border-light);
+  background: var(--color-bg-card);
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 .sel-track-card:hover {
-  background: #f7f7f7;
-  border-color: #d1d1d1;
+  background: var(--color-bg-card-hover);
+  border-color: var(--color-border);
   transform: scale(1.02);
 }
 .sel-track-card--selected {
-  background: #f7f7f7;
-  border-color: #d1d1d1;
+  background: var(--color-bg-card-hover);
+  border-color: var(--color-border);
   transform: scale(1.02);
 }
 .sel-track-icon {
@@ -764,13 +769,13 @@
 .sel-track-name {
   font-size: 15px;
   font-weight: 800;
-  color: #3c3c3c;
+  color: var(--color-text-primary);
   margin-bottom: 4px;
 }
 .sel-track-students {
   font-size: 12px;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--color-text-muted);
 }
 .sel-lang-wrap {
   position: relative;

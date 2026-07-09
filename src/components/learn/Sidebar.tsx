@@ -1,4 +1,5 @@
-import { Home, BookOpen, Trophy, Flag, Store, User, MoreHorizontal, ChevronLeft, ChevronRight, Code } from "lucide-react";
+import { Home, BookOpen, Trophy, Flag, Store, User, MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { CodeTag } from "../ui/CodeTag";
 import "./Sidebar.css";
 
 const navItems = [
@@ -26,7 +27,7 @@ export function Sidebar({
     <div className={"sidebar " + (collapsed ? "sidebar--collapsed" : "sidebar--expanded")}>
       <div className="sidebar-logo">
         <div className="sidebar-logo-icon">
-          <Code />
+          <CodeTag size={24} />
         </div>
         {!collapsed && <span className="sidebar-logo-text">CodeQuest</span>}
       </div>
