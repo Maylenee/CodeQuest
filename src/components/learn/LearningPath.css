@@ -1,11 +1,8 @@
 /* ── Path Container ── */
 .skillpath {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 32px 0 60px;
   position: relative;
-  min-height: 500px;
+  width: 100%;
+  /* height is set inline per-render (totalHeight), based on node count */
 }
 
 /* ── Zigzag SVG Connector ── */
@@ -37,24 +34,17 @@
 }
 
 /* ── Node Row ── */
+/* Absolutely positioned via inline style (left/top, in the SAME coordinate
+   system as the SVG path), so it always sits exactly on the curve
+   regardless of icon size (active/completed/locked all differ in px). */
 .skillpath-node {
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
-  margin-bottom: 0px;
+  position: absolute;
+  transform: translate(-50%, -50%);
   z-index: 2;
 }
-.skillpath-node:last-child {
-  margin-bottom: 0;
-}
-
-/* ── Wave positions (more dramatic zigzag) ── */
-.skillpath-node--pos0 { transform: translateX(40px); }
-.skillpath-node--pos1 { transform: translateX(-30px); }
-.skillpath-node--pos2 { transform: translateX(-60px); }
-.skillpath-node--pos3 { transform: translateX(-30px); }
-.skillpath-node--pos4 { transform: translateX(40px); }
 
 /* ── Node label ── */
 .skillpath-label {
@@ -232,8 +222,10 @@
 }
 
 /* ── MULAI Badge ── */
+/* Tightened: was floating far above the node due to leftover flex spacing.
+   Now sits snug right above the active node's icon. */
 .skillpath-badge-outer {
-  margin-bottom: 12px;
+  margin-bottom: 2px;
 }
 .skillpath-badge {
   position: relative;
@@ -245,7 +237,7 @@
   background: #1a2530;
   border: 2px solid var(--color-primary);
   border-radius: 8px;
-  padding: 5px 16px;
+  padding: 4px 14px;
   font-size: 12px;
   font-weight: 800;
   color: var(--color-primary);

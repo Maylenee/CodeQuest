@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { LessonPage } from "../questions/LessonPage";
 import { Code2, Monitor, Cog, Terminal, BrainCircuit, Plug, Wifi, Database } from "lucide-react";
 import { useGameStore } from "../../lib/store";
@@ -16,6 +16,13 @@ type Node_ = NodeData & {
   status: "completed" | "in_progress" | "locked";
   progress: number;
 };
+
+// ── Layout constants: single source of truth for both nodes AND the SVG curve ──
+const ROW_SPACING = 138;   // vertical distance between two consecutive node centers (px)
+const TOP_PADDING = 90;    // space above the first node (room for MULAI badge / floating icons)
+const BOTTOM_PADDING = 60; // space below the last node
+const X_LEFT = 34;         // left node x position, in % of container width
+const X_RIGHT = 66;        // right node x position, in % of container width
 
 function getNodes(track: string, skillLevel: number) {
   const meta = getTrackContent(track).nodes;
@@ -36,6 +43,27 @@ function getNodes(track: string, skillLevel: number) {
     }
     return { ...m, status: "locked" as const, progress: 0 };
   });
+}
+
+// ── Compute node center coordinates (%, px) — this is the ONLY place positions come from ──
+function getNodeCoords(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    x: i % 2 === 0 ? X_LEFT : X_RIGHT,
+    y: TOP_PADDING + i * ROW_SPACING,
+  }));
+}
+
+// ── Build a smooth S-curve path that passes exactly through each node coordinate ──
+function buildPathD(points: { x: number; y: number }[]) {
+  if (points.length === 0) return "";
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1];
+    const curr = points[i];
+    const midY = (prev.y + curr.y) / 2;
+    d += ` C ${prev.x} ${midY}, ${curr.x} ${midY}, ${curr.x} ${curr.y}`;
+  }
+  return d;
 }
 
 function TrophySvg() {
@@ -97,7 +125,6 @@ function Checkmark() {
 
 function NodeIcon({ node }: { node: Node_ }) {
   const isActive = node.status === "in_progress";
-  const isLocked = node.status === "locked";
   const isCompleted = node.status === "completed";
   const isChest = node.type === "chest";
   const isMilestone = node.type === "milestone";
@@ -168,6 +195,11 @@ export function LearningPath() {
   const [activeLesson, setActiveLesson] = useState<string | null>(null);
   const [nodes, setNodes] = useState<Node_[]>(() => getNodes(selectedTrack, skillLevel));
 
+  // Single source of truth: coordinates for nodes AND the curve are derived from the same array
+  const coords = useMemo(() => getNodeCoords(nodes.length), [nodes.length]);
+  const totalHeight = TOP_PADDING + (nodes.length - 1) * ROW_SPACING + BOTTOM_PADDING;
+  const pathD = useMemo(() => buildPathD(coords), [coords]);
+
   if (activeLesson) {
     return (
       <LessonPage
@@ -181,31 +213,40 @@ export function LearningPath() {
   }
 
   return (
-    <div className="skillpath">
-      {/* Zigzag SVG connector path */}
-      <svg className="path-connector" viewBox="0 0 200 600" preserveAspectRatio="none">
+    <div className="skillpath" style={{ height: totalHeight }}>
+      {/* Curve connector — generated from the exact same coordinates as the nodes below */}
+      <svg
+        className="path-connector"
+        viewBox={`0 0 100 ${totalHeight}`}
+        preserveAspectRatio="none"
+      >
         <path
-          d="M100,0 C130,20 130,50 100,70 C70,90 70,120 100,140 C130,160 130,190 100,210 C70,230 70,260 100,280 C130,300 130,330 100,350 C70,370 70,400 100,420 C130,440 130,470 100,490 C70,510 70,540 100,560"
+          d={pathD}
           stroke="var(--color-primary)"
           strokeWidth="2"
           fill="none"
-          opacity="0.12"
+          opacity="0.15"
           strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
         />
       </svg>
 
       {/* Tech floating icons */}
       <TechFloatingIcons />
 
-      {/* Path nodes */}
+      {/* Path nodes — absolutely positioned on the exact same coordinates as the curve */}
       {nodes.map((node, i) => {
-        const posClass = `skillpath-node--pos${i}`;
         const isActive = node.status === "in_progress";
         const isLocked = node.status === "locked";
         const isLast = i === nodes.length - 1;
+        const { x, y } = coords[i];
 
         return (
-          <div key={node.id} className={`skillpath-node ${posClass}`}>
+          <div
+            key={node.id}
+            className="skillpath-node"
+            style={{ left: `${x}%`, top: y }}
+          >
             {/* Badge above active node */}
             {isActive && (
               <div className="skillpath-badge-outer">
@@ -227,9 +268,7 @@ export function LearningPath() {
             </div>
 
             {/* Node label */}
-            {!isLast && (
-              <span className="skillpath-label">{node.title}</span>
-            )}
+            {!isLast && <span className="skillpath-label">{node.title}</span>}
           </div>
         );
       })}
