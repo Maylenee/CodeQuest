@@ -1,0 +1,117 @@
+import { useEffect, useMemo, useState } from 'react';
+import { Search } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import Navbar from '../../components/Navbar';
+import { TOP_NAV, LANG_TABS } from '../../data/htmlTutorial';
+import {
+  EXAMPLES_SECTIONS,
+  MORE_EXAMPLES,
+  EXAMPLES_SIDEBAR_NAV,
+} from '../../data/htmlExamples';
+import { fetchTrack } from '../../lib/api';
+import LangTabs from '../HtmlTutorialPage/LangTabs';
+import TutorialFooter from '../HtmlTutorialPage/TutorialFooter';
+import ExampleSection from './ExampleSection';
+import ExamplesSidebar from './ExamplesSidebar';
+import GetCertifiedAd from './GetCertifiedAd';
+import Pagination from './Pagination';
+import MoreExamples from './MoreExamples';
+
+function titleCase(slug) {
+  return slug.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function extractCodeBlocks(md) {
+  return [...(md || '').matchAll(/```(?:\w+)?\s*\n([\s\S]*?)\n```/g)]
+    .map((m) => m[1].trim())
+    .filter(Boolean);
+}
+
+export default function HtmlExamplesPage() {
+  const { slug = 'html' } = useParams();
+  const [name, setName] = useState(titleCase(slug));
+  const [dbSections, setDbSections] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchTrack(slug)
+      .then((data) => {
+        if (cancelled) return;
+        setName(data.track?.name || titleCase(slug));
+        const sections = (data.lessons || [])
+          .map((l) => ({ title: l.title, items: extractCodeBlocks(l.content_md) }))
+          .filter((s) => s.items.length);
+        setDbSections(sections.length ? sections : null);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.warn('[ExamplesPage] fallback ke data statis:', err);
+        setDbSections(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const sections = useMemo(() => dbSections || EXAMPLES_SECTIONS, [dbSections]);
+  const more = useMemo(() => (dbSections ? null : MORE_EXAMPLES), [dbSections]);
+
+  return (
+    <div className="min-h-screen bg-white text-slate-900 font-sans">
+      <Navbar
+        links={TOP_NAV}
+        containerClassName="px-6 h-14"
+        logoClassName="text-xl"
+        navClassName="hidden lg:flex items-center gap-5 text-sm font-medium text-slate-600"
+        right={
+          <>
+            <div className="hidden md:flex items-center gap-2 bg-slate-100 rounded px-3 py-1.5 w-64">
+              <input
+                placeholder="Search..."
+                className="bg-transparent text-sm outline-none flex-1"
+              />
+              <Search size={15} className="text-slate-400" />
+            </div>
+            <div className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-600">
+              <span className="hover:text-[#1a2233] cursor-pointer">Get Certified</span>
+              <span className="hover:text-[#1a2233] cursor-pointer">Upgrade</span>
+              <span className="hover:text-[#1a2233] cursor-pointer">Academy</span>
+              <span className="hover:text-[#1a2233] cursor-pointer">Spaces</span>
+            </div>
+            <button
+              type="button"
+              className="bg-emerald-500 text-white font-semibold px-4 py-1.5 rounded hover:bg-emerald-600"
+            >
+              Sign In
+            </button>
+          </>
+        }
+      />
+      <LangTabs tabs={LANG_TABS} />
+
+      <div className="flex gap-6 px-6 py-6">
+        <ExamplesSidebar items={EXAMPLES_SIDEBAR_NAV} />
+
+        <main className="flex-1 min-w-0">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+            <h1 className="text-[28px] font-bold text-slate-900">{name} Examples</h1>
+          </div>
+
+          <Pagination />
+
+          {sections.map((section) => (
+            <ExampleSection key={section.title} title={section.title} items={section.items} />
+          ))}
+
+          {more && <MoreExamples items={more} />}
+
+          <Pagination />
+        </main>
+
+        <GetCertifiedAd />
+      </div>
+
+      <TutorialFooter />
+    </div>
+  );
+}

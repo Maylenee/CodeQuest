@@ -1,0 +1,7 @@
+{
+  "framework": "openai",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "mainlandRegions": ["ap-guangzhou"],
+  "overseasRegions": ["ap-singapore"]
+}

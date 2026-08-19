@@ -1,0 +1,37 @@
+{
+  "name": "codequest",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CodeQuest - platform belajar coding interaktif (mirip web3school) di atas EdgeOne Makers (Pages Functions, Agents, Sandbox, Turso).",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "migrate": "node --env-file=.env scripts/migrate.js",
+    "seed": "node --env-file=.env scripts/seed.js",
+    "eo:dev": "edgeone pages dev",
+    "eo:link": "edgeone pages link"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "lucide-react": "^1.32.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.7.0",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^6.26.2",
+    "remark-gfm": "^4.0.1",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.9",
+    "vite": "^5.4.6"
+  }
+}

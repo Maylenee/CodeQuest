@@ -1,0 +1,127 @@
+export const NAV_LINKS = [
+  'Tutorials',
+  'Exercises',
+  'Certificates',
+  'Services',
+  'Spaces',
+  'Plus',
+];
+
+export const LANG_CARDS = [
+  {
+    name: 'HTML',
+    tag: 'The language for building web pages',
+    bg: 'bg-[#c8492b]',
+    color: '#c8492b',
+    btn: 'bg-[#1a2233]',
+    link: '/learn/html',
+    example: [
+      '<!DOCTYPE html>',
+      '<html>',
+      '<body>',
+      '',
+      '<h1>My First Heading</h1>',
+      '<p>My first paragraph.</p>',
+      '',
+      '</body>',
+      '</html>',
+    ],
+  },
+  {
+    name: 'CSS',
+    tag: 'The language for styling web pages',
+    bg: 'bg-[#f2cf4a]',
+    color: '#f2cf4a',
+    btn: 'bg-[#1a2233]',
+    link: '/learn/css',
+    example: [
+      'body {',
+      '  background-color: linen;',
+      '}',
+      '',
+      'h1 {',
+      '  color: maroon;',
+      '  margin-left: 40px;',
+      '}',
+    ],
+  },
+  {
+    name: 'JavaScript',
+    tag: 'The language for programming web pages',
+    bg: 'bg-[#1a2233]',
+    color: '#1a2233',
+    btn: 'bg-[#f2cf4a] text-[#1a2233]',
+    dark: true,
+    link: '/learn/javascript',
+    example: [
+      "function myFunction(p1, p2) {",
+      '  return p1 * p2;',
+      '}',
+      '',
+      "document.getElementById('demo')",
+      '  .innerHTML =',
+      '  myFunction(4, 3);',
+    ],
+  },
+  {
+    name: 'Python',
+    tag: 'A popular programming language',
+    bg: 'bg-[#efe7d8]',
+    color: '#efe7d8',
+    text: 'text-[#1a2233]',
+    btn: 'bg-[#1a2233]',
+    link: '/learn/python',
+    example: [
+      'if 5 > 2:',
+      "  print('Five is greater than two!')",
+      '',
+      'x = 5',
+      "y = 'John'",
+      'print(x)',
+      'print(y)',
+    ],
+  },
+  {
+    name: 'SQL',
+    tag: 'A language for accessing databases',
+    bg: 'bg-[#a9ddd6]',
+    color: '#a9ddd6',
+    text: 'text-[#1a2233]',
+    btn: 'bg-[#1a2233]',
+    link: '/learn/sql',
+    example: [
+      'SELECT * FROM Customers',
+      "WHERE Country = 'Mexico';",
+    ],
+  },
+];
+
+export const SMALL_LANG_CARDS = [
+  { name: 'PHP', tag: 'A server-side programming language', bg: 'bg-[#f3c6cf]', link: '/learn/php' },
+  { name: 'jQuery', tag: 'A JS library for developing web pages', bg: 'bg-[#a7dedb]' },
+  { name: 'Java', tag: 'A popular programming language', bg: 'bg-[#bfe3cf]', link: '/learn/java' },
+  { name: 'C++', tag: 'A powerful programming language', bg: 'bg-[#f3c6cf]' },
+  { name: 'W3.CSS', tag: 'A CSS framework for faster & responsive design', bg: 'bg-[#a7dedb]' },
+  { name: 'Bootstrap', tag: 'A CSS framework for designing better web pages', bg: 'bg-[#1a2233]', dark: true },
+];
+
+export const TAGS = [
+  'C', 'Kotlin', 'Node.js', 'React',
+  'JSON', 'Vue', 'MySQL', 'XML',
+  'Sass', 'Icons', 'R', 'Graphics',
+  'SVG', 'Canvas', 'Raspberry Pi', 'Cyber Security',
+  'Colors', 'Git', 'Matplotlib', 'NumPy',
+  'Pandas', 'SciPy', 'ASP', 'AngularJS',
+  'AppML', 'Go', 'TypeScript', 'Django',
+  'MongoDB', 'Statistics', 'Data Science', 'PostgreSQL',
+  'HowTo', 'Excel', 'DSA', 'Rust',
+  'Machine Learning', 'Artificial Intelligence', 'Spaces', 'Typing Speed',
+  'Intro to Programming', 'Bash', 'Swift', 'Angular',
+];
+
+export const TAG_COLORS = [
+  'bg-[#c8492b]',
+  'bg-[#f2cf4a]',
+  'bg-[#a7dedb]',
+  'bg-[#1a2233]',
+];
