@@ -122,7 +122,7 @@ export default function HtmlTutorialPage() {
         links={TOP_NAV}
         activeTopic={name.toUpperCase()}
         containerClassName="px-6 h-14"
-        logoClassName="text-xl"
+        logoClassName="h-5 w-auto"
         navClassName="hidden lg:flex items-center gap-5 text-sm font-medium text-slate-600"
         right={
           <>
@@ -313,7 +313,7 @@ export default function HtmlTutorialPage() {
           {/* track progress */}
           <h2 className="text-2xl font-black mt-10">Track Your Progress</h2>
           <p className="text-sm text-slate-600 mt-2 max-w-md">
-            Create a DevAcademy account and get access to more features and
+            Create a CodeQuest account and get access to more features and
             learning materials:
           </p>
           <ul className="mt-4 space-y-2 max-w-md">
@@ -333,14 +333,14 @@ export default function HtmlTutorialPage() {
 
           <div className="mt-8 bg-amber-50 border-l-4 border-amber-300 p-4 text-sm text-slate-700">
             <span className="font-semibold">Note: </span>
-            This is an optional feature. You can study at DevAcademy without
+            This is an optional feature. You can study at CodeQuest without
             creating an account.
           </div>
 
           {/* references */}
           <h2 className="text-2xl font-black mt-10">{name} References</h2>
           <p className="text-sm text-slate-600 mt-2 max-w-2xl">
-            At DevAcademy you will find complete references about {name}
+            At CodeQuest you will find complete references about {name}
             elements, attributes, events, color names, entities,
             character-sets, URL encoding, language codes, HTTP messages,
             browser support, and more.
@@ -362,7 +362,7 @@ export default function HtmlTutorialPage() {
               <p className="text-emerald-700 text-xs font-bold mb-1">{name.toUpperCase()} CERTIFICATION</p>
               <h3 className="text-2xl font-black">Get Certified in {name}</h3>
               <p className="text-sm text-slate-600 mt-2">
-                Complete the DevAcademy {name} course, strengthen your
+                Complete the CodeQuest {name} course, strengthen your
                 knowledge, and earn a certificate you can add to your CV,
                 portfolio, and LinkedIn profile.
               </p>

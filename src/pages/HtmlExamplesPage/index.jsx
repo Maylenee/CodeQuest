@@ -61,7 +61,7 @@ export default function HtmlExamplesPage() {
       <Navbar
         links={TOP_NAV}
         containerClassName="px-6 h-14"
-        logoClassName="text-xl"
+        logoClassName="h-5 w-auto"
         navClassName="hidden lg:flex items-center gap-5 text-sm font-medium text-slate-600"
         right={
           <>

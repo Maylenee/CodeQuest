@@ -158,10 +158,15 @@ function htmlToMarkdown(html) {
   // buang tombol & link bergaya button (Try it Yourself, Learn now, dst)
   s = s.replace(/<a[^>]*class="[^"]*w3-btn[^"]*"[^>]*>[\s\S]*?<\/a>/gi, '');
   s = s.replace(/<button[^>]*>[\s\S]*?<\/button>/gi, '');
-  // inline code w3schools -> backtick
+  // inline code w3schools -> backtick (disimpan via placeholder agar isi <..> tidak ikut
+  // terhapus oleh tahap pembersihan tag di akhir)
+  const inlineCodes = [];
   s = s.replace(
     /<code class="w3-codespan"[^>]*>([\s\S]*?)<\/code>/gi,
-    (_, c) => '`' + decodeHtml(c.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim()) + '`'
+    (_, c) => {
+      inlineCodes.push('`' + c.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim() + '`');
+      return `\u0001${inlineCodes.length - 1}\u0001`;
+    }
   );
 
   s = s.replace(
@@ -231,6 +236,9 @@ function htmlToMarkdown(html) {
   s = s.replace(/\n{3,}/g, '\n\n');
   s = s.replace(/[ \t]+\n/g, '\n');
   s = s.split('\n').map((l) => l.trimEnd()).join('\n').trim();
+  inlineCodes.forEach((code, i) => {
+    s = s.replace(`\u0001${i}\u0001`, decodeHtml(code));
+  });
   return s;
 }
 

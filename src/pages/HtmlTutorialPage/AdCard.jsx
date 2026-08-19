@@ -1,10 +1,11 @@
 import { FacebookIcon, GithubIcon } from '../../components/SocialIcons';
+import Logo from '../../components/Logo';
 
 export default function AdCard() {
   return (
     <div className="bg-white border border-slate-200 rounded p-4 flex flex-col items-center text-center gap-2">
-      <span className="text-lg font-black">
-        Dev<span className="text-emerald-500">Academy</span>
+      <span className="text-lg font-black flex items-center gap-1">
+        <Logo className="h-5 w-auto" />
       </span>
       <p className="text-xs text-slate-500">
         Sign in to track your progress and earn XP.

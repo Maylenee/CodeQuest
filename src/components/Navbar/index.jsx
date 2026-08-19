@@ -22,7 +22,7 @@ const NAV_MODALS = {
   },
   References: {
     title: 'References',
-    sectionLabel: 'DevAcademy REFERENCES:',
+    sectionLabel: (<span className="flex items-center gap-2"><Logo className="h-4 w-auto" /> REFERENCES:</span>),
     items: REFERENCE_ITEMS,
     mainCard: (topic) => ({
       heading: `${topic} References`,
@@ -42,7 +42,7 @@ const NAV_MODALS = {
   },
   Certificates: {
     title: 'Certificates',
-    sectionLabel: 'DEVACADEMY CERTIFICATES:',
+    sectionLabel: (<span className="flex items-center gap-2"><Logo className="h-4 w-auto" /> CERTIFICATES:</span>),
     items: CERTIFICATE_ITEMS,
     mainCard: (topic) => ({
       heading: `${topic} Certificate`,
@@ -56,7 +56,7 @@ export default function Navbar({
   links = [],
   right,
   containerClassName = 'px-6 h-16',
-  logoClassName = 'text-2xl',
+  logoClassName = 'h-5 w-auto',
   navClassName = 'hidden lg:flex items-center gap-6 text-sm font-medium text-slate-600',
   activeTopic,
 }) {

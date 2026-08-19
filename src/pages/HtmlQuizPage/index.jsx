@@ -94,7 +94,7 @@ export default function HtmlQuizPage() {
       <Navbar
         links={TOP_NAV}
         containerClassName="px-6 h-14"
-        logoClassName="text-xl"
+        logoClassName="h-5 w-auto"
         navClassName="hidden lg:flex items-center gap-5 text-sm font-medium text-slate-600"
         right={
           <>
@@ -142,7 +142,7 @@ export default function HtmlQuizPage() {
           </div>
 
           <p className="text-[15px] text-slate-700 mb-6">
-            You can test your {name} skills with DevAcademy's Quiz.
+            You can test your {name} skills with CodeQuest's Quiz.
           </p>
 
           <h2 className="text-[24px] font-bold text-slate-900 mb-2">The Test</h2>

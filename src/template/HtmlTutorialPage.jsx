@@ -15,6 +15,7 @@ import {
   Linkedin,
   Instagram,
 } from "lucide-react";
+import Logo from '../components/Logo';
 
 /* ---------- data ---------- */
 
@@ -83,11 +84,13 @@ const EXAMPLE_CODE = [
 
 /* ---------- small components ---------- */
 
+import Logo from '../components/Logo';
+
 function AdCard() {
   return (
     <div className="bg-white border border-slate-200 rounded p-4 flex flex-col items-center text-center gap-2">
-      <span className="text-lg font-black">
-        Dev<span className="text-emerald-500">Academy</span>
+      <span className="text-lg font-black flex items-center gap-1">
+        <Logo className="h-5 w-auto" />
       </span>
       <p className="text-xs text-slate-500">
         Sign in to track your progress and earn XP.
@@ -336,7 +339,7 @@ export default function HtmlTutorialPage() {
           {/* track progress */}
           <h2 className="text-2xl font-black mt-10">Track Your Progress</h2>
           <p className="text-sm text-slate-600 mt-2 max-w-md">
-            Create a DevAcademy account and get access to more features and
+            Create a CodeQuest account and get access to more features and
             learning materials:
           </p>
           <ul className="mt-4 space-y-2 max-w-md">
@@ -353,14 +356,14 @@ export default function HtmlTutorialPage() {
 
           <div className="mt-8 bg-amber-50 border-l-4 border-amber-300 p-4 text-sm text-slate-700">
             <span className="font-semibold">Note: </span>
-            This is an optional feature. You can study at DevAcademy without
+            This is an optional feature. You can study at CodeQuest without
             creating an account.
           </div>
 
           {/* references */}
           <h2 className="text-2xl font-black mt-10">HTML References</h2>
           <p className="text-sm text-slate-600 mt-2 max-w-2xl">
-            At DevAcademy you will find complete references about HTML
+            At CodeQuest you will find complete references about HTML
             elements, attributes, events, color names, entities,
             character-sets, URL encoding, language codes, HTTP messages,
             browser support, and more.
@@ -382,7 +385,7 @@ export default function HtmlTutorialPage() {
               <p className="text-emerald-700 text-xs font-bold mb-1">HTML CERTIFICATION</p>
               <h3 className="text-2xl font-black">Get Certified in HTML</h3>
               <p className="text-sm text-slate-600 mt-2">
-                Complete the DevAcademy HTML course, strengthen your
+                Complete the CodeQuest HTML course, strengthen your
                 knowledge, and earn a certificate you can add to your CV,
                 portfolio, and LinkedIn profile.
               </p>
@@ -440,7 +443,7 @@ export default function HtmlTutorialPage() {
       <section className="bg-gradient-to-r from-indigo-100 to-purple-100 mt-10">
         <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <h3 className="text-2xl font-black">Create a DevAcademy Account</h3>
+            <h3 className="text-2xl font-black flex items-center gap-2">Create a <Logo className="h-6 w-auto" /> Account</h3>
             <p className="text-sm text-slate-600 mt-2 max-w-md">
               Ad-free learning, track your progress, earn XP, streaks,
               compete in leagues, build and host websites, unlock coding
@@ -456,8 +459,8 @@ export default function HtmlTutorialPage() {
 
       <footer className="bg-[#0f1420] text-slate-300 text-sm">
         <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="text-lg font-black text-white">
-            Dev<span className="text-emerald-500">Academy</span>
+          <span className="text-lg font-black text-white flex items-center gap-1">
+            <Logo className="h-5 w-auto" />
           </span>
           <div className="flex gap-6">
             <span className="hover:text-white cursor-pointer">Plus</span>
