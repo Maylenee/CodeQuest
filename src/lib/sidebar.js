@@ -17,7 +17,7 @@ export function buildSidebarItems({
     if (g !== current) {
       if (firstGroup) {
         firstGroup = false;
-      } else {
+      } else if (g.toLowerCase() !== `${name} tutorial`.toLowerCase()) {
         items.push({ type: 'group', label: g });
       }
       current = g;

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { LangLogo } from "../icons";
 
 /**
  * Recreation of the W3Schools "HTML Tutorial" mega-menu modal.
@@ -16,8 +17,8 @@ const MORE_TUTORIALS = [
   { name: "C#", desc: "Modern language for Windows & apps", icon: "🅒", color: "text-purple-600" },
 ];
 
-function TutorialIcon({ icon }) {
-  return <span className="text-4xl leading-none">{icon}</span>;
+function TutorialIcon({ name }) {
+  return <LangLogo name={name} size={36} />;
 }
 
 function MainCard() {
@@ -83,14 +84,14 @@ function CertifyCard() {
   );
 }
 
-function TutorialTile({ name, desc, icon, active }) {
+function TutorialTile({ name, desc, active }) {
   return (
     <div
       className={`border rounded-lg p-4 flex flex-col items-center text-center cursor-pointer transition-colors ${
         active ? "border-green-500 bg-green-50" : "border-slate-200 hover:border-slate-300"
       }`}
     >
-      <TutorialIcon icon={icon} />
+      <TutorialIcon name={name} />
       <p className="text-[15px] font-bold text-slate-900 mt-2">{name}</p>
       <p className="text-[12px] text-slate-500 mt-1">{desc}</p>
     </div>

@@ -64,6 +64,83 @@ const TRACKS = [
     color: '#8A6FA5',
     sort_order: 7,
   },
+  {
+    slug: 'w3-css',
+    name: 'W3.CSS',
+    tagline: 'A modern CSS framework for faster and better web pages',
+    color: '#4CAF50',
+    sort_order: 8,
+  },
+  {
+    slug: 'c',
+    name: 'C',
+    tagline: 'A general-purpose, procedural programming language',
+    color: '#5C6BC0',
+    sort_order: 9,
+  },
+  {
+    slug: 'cpp',
+    name: 'C++',
+    tagline: 'A powerful, object-oriented programming language',
+    color: '#E8734A',
+    sort_order: 10,
+  },
+  {
+    slug: 'c-sharp',
+    name: 'C#',
+    tagline: 'A modern, object-oriented programming language by Microsoft',
+    color: '#7A3E9D',
+    sort_order: 11,
+  },
+  {
+    slug: 'how-to',
+    name: 'HOW TO',
+    tagline: 'Learn how to create common web components with examples',
+    color: '#2196F3',
+    sort_order: 12,
+  },
+  {
+    slug: 'bootstrap',
+    name: 'Bootstrap',
+    tagline: 'A popular CSS framework for responsive web design',
+    color: '#6F42C1',
+    sort_order: 13,
+  },
+  {
+    slug: 'react',
+    name: 'React',
+    tagline: 'A JavaScript library for building user interfaces',
+    color: '#61DAFB',
+    sort_order: 14,
+  },
+  {
+    slug: 'mysql',
+    name: 'MySQL',
+    tagline: 'The most popular open-source relational database',
+    color: '#E48E00',
+    sort_order: 15,
+  },
+  {
+    slug: 'jquery',
+    name: 'jQuery',
+    tagline: 'A fast, small, and feature-rich JavaScript library',
+    color: '#0769AD',
+    sort_order: 16,
+  },
+  {
+    slug: 'excel',
+    name: 'Excel',
+    tagline: 'Learn how to use Excel with formulas, charts, and automation',
+    color: '#217346',
+    sort_order: 17,
+  },
+  {
+    slug: 'xml',
+    name: 'XML',
+    tagline: 'A markup language for storing and transporting data',
+    color: '#A9DDD6',
+    sort_order: 18,
+  },
 ];
 
 const HTML_QUIZ = [
@@ -121,21 +198,12 @@ async function main() {
   }
   console.log(`  tracks: ${TRACKS.length}`);
 
-  // HTML lessons
-  const htmlLessonTitles = [
-    'HTML HOME', 'HTML Introduction', 'HTML Editors', 'HTML Basic', 'HTML Elements',
-    'HTML Attributes', 'HTML Headings', 'HTML Paragraphs', 'HTML Styles',
-    'HTML Formatting', 'HTML Quotations', 'HTML Comments', 'HTML Colors', 'HTML CSS',
-  ];
+  // Lessons are populated by the scraper (scripts/scrape-w3schools.js), which
+  // inserts clean slugs (e.g. "elements", not "html-elements"). Seeding them
+  // here previously created duplicate chapters in the sidebar.
+
   const { rows: htmlTrack } = await db.execute("SELECT id FROM tracks WHERE slug = 'html'");
   const htmlTrackId = htmlTrack[0].id;
-  for (const [i, t] of htmlLessonTitles.entries()) {
-    await db.execute(
-      'INSERT INTO lessons (id, track_id, slug, title, sort_order) VALUES (?, ?, ?, ?, ?) ON CONFLICT(track_id, slug) DO NOTHING',
-      [ulid(), htmlTrackId, t.toLowerCase().replace(/[^a-z0-9]+/g, '-'), t, i + 1]
-    );
-  }
-  console.log(`  lessons (html): ${htmlLessonTitles.length}`);
 
   // Exercises from frontend htmlExercises.js
   let seq = 0;

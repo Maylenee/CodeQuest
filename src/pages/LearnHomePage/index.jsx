@@ -1,11 +1,8 @@
-import { useState } from 'react';
 import { Search, Code2, Award, Sparkles, ArrowRight } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import SectionCard from '../../components/SectionCard';
 import TagMosaic from '../../components/TagMosaic';
 import PillButton from '../../components/PillButton';
-import SignInModal from '../../components/SignInModal';
-import SignUpModal from '../../components/SignUpModal';
 import {
   LANG_CARDS,
   SMALL_LANG_CARDS,
@@ -19,8 +16,6 @@ import BigLangSection from './BigLangSection';
 import SmallLangCard from './SmallLangCard';
 
 export default function LearnHomePage() {
-  const [showSignIn, setShowSignIn] = useState(false);
-  const [showSignUp, setShowSignUp] = useState(false);
   return (
     <div className="font-sans text-[#1a2233] bg-white">
       <Navbar
@@ -29,40 +24,15 @@ export default function LearnHomePage() {
         logoClassName="h-5 w-auto"
         navClassName="hidden lg:flex items-center gap-5 text-sm font-medium text-slate-600"
         right={
-          <>
-            <div className="hidden md:flex items-center gap-2 bg-slate-100 rounded px-3 py-1.5 w-64">
-              <input
-                placeholder="Search..."
-                className="bg-transparent text-sm outline-none flex-1"
-              />
-              <Search size={15} className="text-slate-400" />
-            </div>
-            <div className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-600">
-              <span className="hover:text-[#1a2233] cursor-pointer">Get Certified</span>
-              <span className="hover:text-[#1a2233] cursor-pointer">Upgrade</span>
-              <span className="hover:text-[#1a2233] cursor-pointer">Academy</span>
-              <span className="hover:text-[#1a2233] cursor-pointer">Spaces</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowSignIn(true)}
-              className="bg-emerald-500 text-white font-semibold px-4 py-1.5 rounded hover:bg-emerald-600"
-            >
-              Sign In
-            </button>
-          </>
+          <div className="hidden md:flex items-center gap-2 bg-slate-100 rounded px-3 py-1.5 w-64">
+            <input
+              placeholder="Search..."
+              className="bg-transparent text-sm outline-none flex-1"
+            />
+            <Search size={15} className="text-slate-400" />
+          </div>
         }
       />
-      {showSignIn ? (
-        <SignInModal
-          onClose={() => setShowSignIn(false)}
-          onSignUp={() => {
-            setShowSignIn(false);
-            setShowSignUp(true);
-          }}
-        />
-      ) : null}
-      {showSignUp ? <SignUpModal onClose={() => setShowSignUp(false)} /> : null}
       <LangTabs tabs={LANG_TABS} />
 
       <HeroSection />

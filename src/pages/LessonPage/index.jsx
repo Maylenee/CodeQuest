@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Bookmark } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import { TOP_NAV, LANG_TABS } from '../../data/htmlTutorial';
-import { fetchTrack } from '../../lib/api';
+import { fetchTrack, fetchBookmarks, addBookmark, removeBookmark, recordProgress } from '../../lib/api';
 import { buildSidebarItems } from '../../lib/sidebar';
 import LangTabs from '../HtmlTutorialPage/LangTabs';
 import TutorialSidebar from '../HtmlTutorialPage/TutorialSidebar';
@@ -38,7 +39,7 @@ function normalizeFlattenedMarkdown(raw) {
   if (!raw) return raw;
   if (raw.includes('\n\n')) return raw;
 
-  let text = raw.trim();
+  let text = raw.trim()
 
   // 1) Protect fenced code examples before anything else touches them.
   const codeBlocks = [];
@@ -336,7 +337,7 @@ const markdownComponents = {
   hr: () => <hr className="my-6 border-slate-200" />,
 };
 
-function NextPrevBar({ slug, prev, next, index, total, label }) {
+function NextPrevBar({ slug, prev, next, index, total, title }) {
   const prevBtn = prev ? (
     <Link
       to={`/learn/${slug}/${prev.slug}`}
@@ -348,14 +349,15 @@ function NextPrevBar({ slug, prev, next, index, total, label }) {
     <span className="w-24" />
   );
 
-  const mid = label ? (
-    <span className="border border-slate-300 rounded-sm px-4 py-2 text-[13px] text-slate-500">
-      {label}
-    </span>
-  ) : (
-    <span className="text-[13px] text-slate-500">
-      {index + 1} / {total}
-    </span>
+  const mid = (
+    <div className="flex flex-col items-center leading-tight">
+      {title && (
+        <span className="text-[13px] font-semibold text-slate-700">{title}</span>
+      )}
+      <span className="text-[12px] text-slate-400">
+        {index + 1} / {total}
+      </span>
+    </div>
   );
 
   const nextBtn = next ? (
@@ -381,14 +383,100 @@ function NextPrevBar({ slug, prev, next, index, total, label }) {
 export default function LessonPage() {
   const { slug = 'html', lessonSlug } = useParams();
   const fallbackName = useMemo(() => titleCase(slug), [slug]);
+  const userId = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('codelearn_user') || 'null')?.id || null;
+    } catch {
+      return null;
+    }
+  }, []);
   const [track, setTrack] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [exercises, setExercises] = useState([]);
   const [quizzes, setQuizzes] = useState([]);
   const [references, setReferences] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [savingBookmark, setSavingBookmark] = useState(false);
 
   const name = track?.name || fallbackName;
+
+  const index = lessons.findIndex((l) => l.slug === lessonSlug);
+  const lesson = index >= 0 ? lessons[index] : null;
+  const prev = index > 0 ? lessons[index - 1] : null;
+  const next = index >= 0 && index < lessons.length - 1 ? lessons[index + 1] : null;
+
+  useEffect(() => {
+    if (!userId || !lesson) {
+      setBookmarked(false);
+      return;
+    }
+    let alive = true;
+    fetchBookmarks(userId)
+      .then((d) => {
+        if (!alive) return;
+        const found = (d.bookmarks || []).some((b) => b.lessonId === lesson.id);
+        setBookmarked(found);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [userId, lesson]);
+
+  // Progres otomatis berdasarkan lama membaca halaman — proporsional dgn panjang
+  // isi lesson (perkiraan waktu baca). Setelah user cukup lama di halaman, lesson
+  // otomatis tercatat selesai (XP + streak hari itu).
+  const lessonDwellMs = useMemo(() => {
+    const words = (lesson?.content_md || '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean).length;
+    const seconds = Math.max(15, Math.min(180, (words / 200) * 60));
+    return Math.round(seconds * 1000);
+  }, [lesson?.content_md]);
+
+  useEffect(() => {
+    if (!userId || !lesson) return;
+    const t = setTimeout(() => {
+      recordProgress({
+        userId,
+        trackId: track?.id,
+        lessonId: lesson.id,
+        kind: 'lesson',
+        status: 'completed',
+      }).catch(() => {});
+    }, lessonDwellMs);
+    return () => clearTimeout(t);
+  }, [userId, lesson, track?.id, lessonDwellMs]);
+
+  const handleBookmark = async () => {
+    if (!userId) {
+      alert('Please sign in to bookmark lessons.');
+      return;
+    }
+    if (!lesson) return;
+    setSavingBookmark(true);
+    try {
+      if (bookmarked) {
+        await removeBookmark({ userId, lessonId: lesson.id });
+        setBookmarked(false);
+      } else {
+        await addBookmark({
+          userId,
+          trackId: track?.id,
+          lessonId: lesson.id,
+          title: lesson.title,
+          url: `/learn/${slug}/${lesson.slug}`,
+        });
+        setBookmarked(true);
+      }
+    } catch (e) {
+      alert(e.message || 'Gagal menyimpan bookmark.');
+    } finally {
+      setSavingBookmark(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -418,15 +506,12 @@ export default function LessonPage() {
     };
   }, [slug]);
 
-  const index = lessons.findIndex((l) => l.slug === lessonSlug);
-  const lesson = index >= 0 ? lessons[index] : null;
-  const prev = index > 0 ? lessons[index - 1] : null;
-  const next = index >= 0 && index < lessons.length - 1 ? lessons[index + 1] : null;
-
-  const contentMd = useMemo(
-    () => normalizeFlattenedMarkdown(lesson?.content_md),
-    [lesson?.content_md]
-  );
+  const contentMd = useMemo(() => {
+    const md = normalizeFlattenedMarkdown(lesson?.content_md || '');
+    // Judul chapter sudah ditampilkan besar di header, jadi buang H1 pertama
+    // agar tidak duplikat di dalam konten.
+    return md.replace(/^\s*#\s+.*(\r?\n|$)/, '').replace(/^\s+/, '');
+  }, [lesson?.content_md]);
 
   const sidebarItems = useMemo(() => {
     if (loading) return [];
@@ -446,14 +531,6 @@ export default function LessonPage() {
         containerClassName="px-6 h-14"
         logoClassName="h-5 w-auto"
         navClassName="hidden lg:flex items-center gap-5 text-sm font-medium text-slate-600"
-        right={
-          <button
-            type="button"
-            className="bg-emerald-500 text-white font-semibold px-4 py-1.5 rounded hover:bg-emerald-600"
-          >
-            Sign In
-          </button>
-        }
       />
       <LangTabs tabs={LANG_TABS} />
 
@@ -488,18 +565,44 @@ export default function LessonPage() {
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between mb-2">
-                <h1 className="text-[32px] font-bold text-slate-900">{lesson.title}</h1>
-                <Link
-                  to={`/learn/${slug}`}
-                  className="inline-flex items-center gap-1 text-sm font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 rounded px-3 py-1.5"
+
+              <div className="mb-6 flex items-start justify-between gap-4">
+                <h1 className="text-3xl font-black text-[#1a2233]">{lesson?.title}</h1>
+                <button
+                  type="button"
+                  onClick={handleBookmark}
+                  disabled={savingBookmark}
+                  title={bookmarked ? 'Remove bookmark' : 'Bookmark this lesson'}
+                  className="mt-1 shrink-0 rounded-md p-2 hover:bg-slate-100 disabled:opacity-50"
                 >
-                  {name} HOME
-                </Link>
+                  <Bookmark
+                    size={22}
+                    className={bookmarked ? 'fill-emerald-600 text-emerald-600' : 'text-slate-400'}
+                  />
+                </button>
               </div>
 
-              <div className="mb-8">
-                <NextPrevBar slug={slug} prev={prev} next={next} index={index} total={lessons.length} />
+              <div className="flex items-center justify-between">
+                {prev ? (
+                  <Link
+                    to={`/learn/${slug}/${prev.slug}`}
+                    className="flex items-center gap-1 border border-slate-300 rounded-sm px-4 py-2 text-[14px] text-slate-700 hover:bg-slate-50"
+                  >
+                    ‹ Previous
+                  </Link>
+                ) : (
+                  <span />
+                )}
+                {next ? (
+                  <Link
+                    to={`/learn/${slug}/${next.slug}`}
+                    className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-sm px-5 py-2 text-[14px] font-semibold"
+                  >
+                    Next ›
+                  </Link>
+                ) : (
+                  <span />
+                )}
               </div>
 
               <ReactMarkdown
@@ -553,7 +656,7 @@ export default function LessonPage() {
                   next={next}
                   index={index}
                   total={lessons.length}
-                  label="Sign in to track progress"
+                  title={lesson?.title}
                 />
               </div>
             </>

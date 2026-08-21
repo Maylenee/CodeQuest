@@ -71,25 +71,18 @@ export default function HtmlExercisesPage() {
     <div className="min-h-screen bg-white text-slate-900 font-sans">
       <Navbar
         links={TOP_NAV}
+        activeRight="Sign In"
         containerClassName="px-6 h-14"
         logoClassName="h-5 w-auto"
         navClassName="hidden lg:flex items-center gap-5 text-sm font-medium text-slate-600"
         right={
-          <>
-            <div className="hidden md:flex items-center gap-2 bg-slate-100 rounded px-3 py-1.5 w-64">
-              <input
-                placeholder="Search..."
-                className="bg-transparent text-sm outline-none flex-1"
-              />
-              <Search size={15} className="text-slate-400" />
-            </div>
-            <button
-              type="button"
-              className="bg-emerald-500 text-white font-semibold px-4 py-1.5 rounded hover:bg-emerald-600"
-            >
-              Sign In
-            </button>
-          </>
+          <div className="hidden md:flex items-center gap-2 bg-slate-100 rounded px-3 py-1.5 w-64">
+            <input
+              placeholder="Search..."
+              className="bg-transparent text-sm outline-none flex-1"
+            />
+            <Search size={15} className="text-slate-400" />
+          </div>
         }
       />
       <LangTabs tabs={LANG_TABS} />
@@ -127,15 +120,6 @@ export default function HtmlExercisesPage() {
             </button>
           </div>
 
-          <div className="flex items-center justify-between mb-3">
-            <h1 className="text-[30px] font-bold text-slate-900">{name} Exercises</h1>
-            <Link
-              to={`/learn/${slug}`}
-              className="inline-flex items-center gap-1 text-sm font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 rounded px-3 py-1.5"
-            >
-              {name} HOME
-            </Link>
-          </div>
 
           <div className="flex items-center justify-between mb-6">
             <button

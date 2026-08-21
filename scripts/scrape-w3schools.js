@@ -19,33 +19,42 @@ const UA =
 
 const BASE = 'https://www.w3schools.com';
 
-const PREFIXES = {
-  html: ['html5', 'html'],
-  css: ['css3', 'css'],
-  javascript: ['js'],
-  python: ['python'],
-  sql: ['sql'],
-  java: ['java'],
-  php: ['php'],
+// Konfigurasi per track: folder W3Schools (dir), prefix penamaan file lesson,
+// dan entry page ('' artinya root /{dir}/, 'default.asp' artinya /{dir}/default.asp).
+const TRACK_CFG = {
+  html: { dir: 'html', prefixes: ['html5', 'html'], entry: 'default.asp' },
+  css: { dir: 'css', prefixes: ['css3', 'css'], entry: 'default.asp' },
+  javascript: { dir: 'js', prefixes: ['js'], entry: 'default.asp' },
+  python: { dir: 'python', prefixes: ['python'], entry: 'default.asp' },
+  sql: { dir: 'sql', prefixes: ['sql'], entry: 'default.asp' },
+  java: { dir: 'java', prefixes: ['java'], entry: 'default.asp' },
+  php: { dir: 'php', prefixes: ['php'], entry: 'default.asp' },
+  'w3-css': { dir: 'w3css', prefixes: ['w3css'], entry: '' },
+  c: { dir: 'c', prefixes: ['c'], entry: '' },
+  cpp: { dir: 'cpp', prefixes: ['cpp'], entry: '' },
+  'c-sharp': { dir: 'cs', prefixes: ['cs'], entry: '' },
+  'how-to': { dir: 'howto', prefixes: ['howto'], entry: '' },
+  bootstrap: { dir: 'bootstrap', prefixes: ['bootstrap'], entry: '' },
+  react: { dir: 'react', prefixes: ['react'], entry: '' },
+  mysql: { dir: 'mysql', prefixes: ['mysql'], entry: '' },
+  jquery: { dir: 'jquery', prefixes: ['jquery'], entry: '' },
+  excel: { dir: 'excel', prefixes: ['excel'], entry: '' },
+  xml: { dir: 'xml', prefixes: [], entry: '' },
 };
 
-// Folder W3Schools per slug track (mis. track 'javascript' ada di /js/).
-const DIR = {
-  html: 'html',
-  css: 'css',
-  javascript: 'js',
-  python: 'python',
-  sql: 'sql',
-  java: 'java',
-  php: 'php',
-};
+// Track yang akan di-scrape saat argumen 'new' (bahasa yang belum ada datanya).
+const NEW_TRACKS = [
+  'w3-css', 'c', 'cpp', 'c-sharp', 'how-to', 'bootstrap',
+  'react', 'mysql', 'jquery', 'excel', 'xml',
+];
 
 // Section sidebar yang BUKAN materi tutorial (dilewati).
-const SECTION_EXCLUDE = /example|exercise|quiz|exam|cert|reference|challenge|old technologies|how to/i;
+// Catatan: 'how to' sengaja tidak di-exclude karena ada track 'how-to'.
+const SECTION_EXCLUDE = /example|exercise|quiz|exam|cert|reference|challenge|old technologies/i;
 
 // Link yang bukan lesson (challenges, halaman pendukung, reference, dll).
 const LINK_EXCLUDE =
-  /_challenges|_examples?\.asp|_exercises?\.asp|_quiz\.asp|_exam\.asp|_exercise_embed|_bootcamp|_study_plan|_syllabus|_summary|_website|_interview|_editor|_tryit|_bootcamp|func_|ref_|keyword_|_refs?\.asp/i;
+  /_challenges|_examples?\.asp|_examples?\.php|_exercises?\.asp|_exercises?\.php|_quiz\.asp|_quiz\.php|_exam\.asp|_exercise_embed|_bootcamp|_study_plan|_syllabus|_summary|_website|_interview|_editor|_tryit|_bootcamp|func_|ref_|keyword_|_refs?\.asp|_cert|_certificate/i;
 
 // Halaman index reference per track (untuk tabel reference_links).
 const REFERENCES = {
@@ -92,14 +101,14 @@ function extractLessonLinks(html) {
     const to = side.slice(m.index + m[0].length).indexOf('<h2 class="left">');
     const seg = to === -1 ? side.slice(from) : side.slice(from, from + to);
 
-    const homeMatch = seg.match(/<a[^>]*href=["']default\.asp["'][^>]*>([^<]*)<\/a>/);
-    if (homeMatch && !seen.has('default.asp')) {
-      seen.add('default.asp');
-      links.push({ path: 'default.asp', label: homeMatch[1].trim(), group });
+    const homeMatch = seg.match(/<a[^>]*href=["'](default\.asp|index\.asp|index\.php|default\.php)["'][^>]*>([^<]*)<\/a>/);
+    if (homeMatch && !seen.has(homeMatch[1])) {
+      seen.add(homeMatch[1]);
+      links.push({ path: homeMatch[1], label: homeMatch[2].trim(), group });
     }
 
     for (const a of seg.matchAll(
-      /<a[^>]*href=["']([a-z0-9]+[0-9]*_[a-z0-9_]*\.asp)["'][^>]*>([^<]*)<\/a>/g
+      /<a[^>]*href=["']([a-z0-9]+[0-9]*_[a-z0-9_]*\.(?:asp|php))["'][^>]*>([^<]*)<\/a>/gi
     )) {
       const href = a[1];
       if (LINK_EXCLUDE.test(href)) continue;
@@ -113,10 +122,10 @@ function extractLessonLinks(html) {
 }
 
 function getSlug(path, track) {
-  if (path === 'default.asp') return 'home';
-  const file = path.replace(/\.asp$/, '');
+  if (['default.asp', 'index.asp', 'index.php', 'default.php'].includes(path)) return 'home';
+  const file = path.replace(/\.(asp|php)$/, '');
   let s = file;
-  for (const p of PREFIXES[track] || [track]) {
+  for (const p of TRACK_CFG[track]?.prefixes || [track]) {
     if (s === p || s.startsWith(`${p}_`)) {
       s = s.slice(p.length).replace(/^_+/, '');
       break;
@@ -279,8 +288,10 @@ async function scrapeTrack(track) {
     return;
   }
   const trackId = trackRows[0].id;
-  const dir = DIR[track] || track;
-  const indexHtml = await fetchHtml(`${dir}/default.asp`);
+  const cfg = TRACK_CFG[track] || { dir: track, prefixes: [track], entry: 'default.asp' };
+  const dir = cfg.dir;
+  const entryPath = cfg.entry ? `${dir}/${cfg.entry}` : dir;
+  const indexHtml = await fetchHtml(entryPath);
   const lessons = extractLessonLinks(indexHtml);
   console.log(`[${track}] ${lessons.length} lesson ditemukan di sidebar.`);
 
@@ -349,8 +360,11 @@ async function scrapeTrack(track) {
 }
 
 async function main() {
-  const arg = process.argv[2] || 'all';
-  const tracks = arg === 'all' ? Object.keys(PREFIXES) : [arg];
+  const arg = process.argv[2] || 'new';
+  let tracks;
+  if (arg === 'all') tracks = Object.keys(TRACK_CFG);
+  else if (arg === 'new') tracks = NEW_TRACKS;
+  else tracks = [arg];
   for (const t of tracks) {
     await scrapeTrack(t);
   }

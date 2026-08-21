@@ -13,6 +13,8 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api/learn': FUNCTIONS_DEV_SERVER,
+      '/api/dashboard': FUNCTIONS_DEV_SERVER,
+      '/api/auth': FUNCTIONS_DEV_SERVER,
       '/tracks': FUNCTIONS_DEV_SERVER,
       '/track-detail': FUNCTIONS_DEV_SERVER,
       '/lesson-detail': FUNCTIONS_DEV_SERVER,

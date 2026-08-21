@@ -177,3 +177,15 @@ CREATE TABLE IF NOT EXISTS user_achievements (
   unlocked_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
   PRIMARY KEY (user_id, achievement_id)
 );
+
+-- ---------- Bookmarks (resource favorit user) ----------
+CREATE TABLE IF NOT EXISTS bookmarks (
+  id        TEXT PRIMARY KEY,
+  user_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  track_id  TEXT REFERENCES tracks(id) ON DELETE SET NULL,
+  lesson_id TEXT REFERENCES lessons(id) ON DELETE SET NULL,
+  title     TEXT NOT NULL,
+  url       TEXT,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_user ON bookmarks(user_id, created_at DESC);

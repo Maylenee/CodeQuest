@@ -49,6 +49,8 @@ export default function TutorialSidebar({
     () => items.filter((i) => i.type === 'group').map((i) => i.label),
     [items]
   );
+  const titleMatch = (label) =>
+    title && label && label.toLowerCase() === title.toLowerCase();
   const [closed, setClosed] = useState(() => new Set());
 
   useEffect(() => {
@@ -72,6 +74,7 @@ export default function TutorialSidebar({
   let currentGroup = '';
   const visibleItems = items.filter((item) => {
     if (item.type === 'group') {
+      if (titleMatch(item.label)) return false;
       currentGroup = item.label;
       return true;
     }

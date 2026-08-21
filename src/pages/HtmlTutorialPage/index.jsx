@@ -121,25 +121,18 @@ export default function HtmlTutorialPage() {
       <Navbar
         links={TOP_NAV}
         activeTopic={name.toUpperCase()}
+        activeRight="Sign In"
         containerClassName="px-6 h-14"
         logoClassName="h-5 w-auto"
         navClassName="hidden lg:flex items-center gap-5 text-sm font-medium text-slate-600"
         right={
-          <>
-            <div className="hidden md:flex items-center gap-2 bg-slate-100 rounded px-3 py-1.5 w-64">
-              <input
-                placeholder="Search..."
-                className="bg-transparent text-sm outline-none flex-1"
-              />
-              <Search size={15} className="text-slate-400" />
-            </div>
-            <button
-              type="button"
-              className="bg-emerald-500 text-white font-semibold px-4 py-1.5 rounded hover:bg-emerald-600"
-            >
-              Sign In
-            </button>
-          </>
+          <div className="hidden md:flex items-center gap-2 bg-slate-100 rounded px-3 py-1.5 w-64">
+            <input
+              placeholder="Search..."
+              className="bg-transparent text-sm outline-none flex-1"
+            />
+            <Search size={15} className="text-slate-400" />
+          </div>
         }
       />
       <LangTabs tabs={LANG_TABS} />
@@ -157,20 +150,6 @@ export default function HtmlTutorialPage() {
 
         {/* MAIN CONTENT */}
         <main className="flex-1 min-w-0 order-2">
-          <div className="flex items-center justify-between mb-4">
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-sm font-semibold text-slate-600"
-            >
-              <ArrowLeft size={14} /> Home
-            </Link>
-            <button
-              type="button"
-              className="flex items-center gap-1 bg-emerald-500 text-white text-sm font-semibold px-4 py-1.5 rounded hover:bg-emerald-600"
-            >
-              Next <ArrowRight size={14} />
-            </button>
-          </div>
 
           <div className="flex items-center justify-between">
             <h1 className="text-4xl font-black">{name} Tutorial</h1>
