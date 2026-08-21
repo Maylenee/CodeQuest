@@ -80,9 +80,11 @@ export default function TutorialSidebar({
 
   return (
     <div className="border border-slate-200 rounded-lg overflow-hidden">
-      <p className="px-4 py-3 text-xs font-bold text-slate-400 tracking-wide bg-slate-50 border-b border-slate-200">
-        {title}
-      </p>
+      {!loading && (
+        <p className="px-4 py-3 text-xs font-bold text-slate-400 tracking-wide bg-slate-50 border-b border-slate-200">
+          {title}
+        </p>
+      )}
       <div className="max-h-[480px] overflow-y-auto">
         {loading
           ? Array.from({ length: 9 }).map((_, i) => <LoadingRow key={i} />)

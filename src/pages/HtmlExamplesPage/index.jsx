@@ -2,18 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
-import { TOP_NAV, LANG_TABS } from '../../data/htmlTutorial';
-import {
-  EXAMPLES_SECTIONS,
-  MORE_EXAMPLES,
-  EXAMPLES_SIDEBAR_NAV,
-} from '../../data/htmlExamples';
+import { TOP_NAV, LANG_TABS, SIDEBAR_ITEMS } from '../../data/htmlTutorial';
+import { EXAMPLES_SECTIONS, MORE_EXAMPLES } from '../../data/htmlExamples';
 import { fetchTrack } from '../../lib/api';
+import { buildSidebarItems } from '../../lib/sidebar';
 import LangTabs from '../HtmlTutorialPage/LangTabs';
+import TutorialSidebar from '../HtmlTutorialPage/TutorialSidebar';
 import TutorialFooter from '../HtmlTutorialPage/TutorialFooter';
+import AdCard from '../HtmlTutorialPage/AdCard';
+import VideoAdCard from '../HtmlTutorialPage/VideoAdCard';
 import ExampleSection from './ExampleSection';
-import ExamplesSidebar from './ExamplesSidebar';
-import GetCertifiedAd from './GetCertifiedAd';
 import Pagination from './Pagination';
 import MoreExamples from './MoreExamples';
 
@@ -31,13 +29,23 @@ export default function HtmlExamplesPage() {
   const { slug = 'html' } = useParams();
   const [name, setName] = useState(titleCase(slug));
   const [dbSections, setDbSections] = useState(null);
+  const [lessons, setLessons] = useState([]);
+  const [exercises, setExercises] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
+  const [references, setReferences] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
     fetchTrack(slug)
       .then((data) => {
         if (cancelled) return;
         setName(data.track?.name || titleCase(slug));
+        setLessons(data.lessons || []);
+        setExercises(data.exercises || []);
+        setQuizzes(data.quizzes || []);
+        setReferences(data.references || []);
         const sections = (data.lessons || [])
           .map((l) => ({ title: l.title, items: extractCodeBlocks(l.content_md) }))
           .filter((s) => s.items.length);
@@ -47,6 +55,9 @@ export default function HtmlExamplesPage() {
         if (cancelled) return;
         console.warn('[ExamplesPage] fallback ke data statis:', err);
         setDbSections(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
     return () => {
       cancelled = true;
@@ -55,6 +66,16 @@ export default function HtmlExamplesPage() {
 
   const sections = useMemo(() => dbSections || EXAMPLES_SECTIONS, [dbSections]);
   const more = useMemo(() => (dbSections ? null : MORE_EXAMPLES), [dbSections]);
+
+  const sidebarItems = useMemo(() => {
+    if (loading) return [];
+    if (!lessons.length) {
+      return slug === 'html'
+        ? SIDEBAR_ITEMS
+        : [{ type: 'group', label: `${name} Tutorial` }];
+    }
+    return buildSidebarItems({ lessons, slug, name, quizzes, exercises, references });
+  }, [lessons, slug, name, quizzes, exercises, references, loading]);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans">
@@ -72,12 +93,6 @@ export default function HtmlExamplesPage() {
               />
               <Search size={15} className="text-slate-400" />
             </div>
-            <div className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-600">
-              <span className="hover:text-[#1a2233] cursor-pointer">Get Certified</span>
-              <span className="hover:text-[#1a2233] cursor-pointer">Upgrade</span>
-              <span className="hover:text-[#1a2233] cursor-pointer">Academy</span>
-              <span className="hover:text-[#1a2233] cursor-pointer">Spaces</span>
-            </div>
             <button
               type="button"
               className="bg-emerald-500 text-white font-semibold px-4 py-1.5 rounded hover:bg-emerald-600"
@@ -89,10 +104,21 @@ export default function HtmlExamplesPage() {
       />
       <LangTabs tabs={LANG_TABS} />
 
-      <div className="flex gap-6 px-6 py-6">
-        <ExamplesSidebar items={EXAMPLES_SIDEBAR_NAV} />
+      <div className="flex flex-col lg:flex-row gap-8 px-6 py-8">
+        <aside className="w-full lg:w-64 shrink-0 lg:order-1">
+          <div className="lg:sticky lg:top-[72px] flex flex-col gap-6">
+            <TutorialSidebar
+              items={sidebarItems}
+              title={`${name.toUpperCase()} TUTORIAL`}
+              loading={loading}
+              activeLabel={`${name} Examples`}
+            />
+            {!loading && <AdCard />}
+            {!loading && <VideoAdCard />}
+          </div>
+        </aside>
 
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 lg:order-2">
           <div className="flex items-center justify-between border-b border-slate-200 pb-2">
             <h1 className="text-[28px] font-bold text-slate-900">{name} Examples</h1>
           </div>
@@ -107,8 +133,6 @@ export default function HtmlExamplesPage() {
 
           <Pagination />
         </main>
-
-        <GetCertifiedAd />
       </div>
 
       <TutorialFooter />

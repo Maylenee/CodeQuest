@@ -1,6 +1,5 @@
 // EdgeOne Cloud Function (Node.js, route-as-a-service).
-// GET /api/learn            -> daftar semua tracks beserta jumlah lesson/exercise/quiz.
-// GET /api/learn?slug=html  -> detail satu track: track, lessons, exercises (grup), quizzes, references.
+// GET /api/learn -> daftar semua tracks beserta jumlah lesson/exercise/quiz.
 import { createClient } from '@libsql/client';
 
 const json = (data, status = 200) =>

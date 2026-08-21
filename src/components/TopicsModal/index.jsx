@@ -62,7 +62,7 @@ export default function TopicsModal({
               <Tile
                 key={t.name}
                 {...t}
-                active={activeName ? t.name === activeName : i === 0}
+                active={Boolean(activeName) && t.name === activeName}
                 onClose={onClose}
               />
             ))}

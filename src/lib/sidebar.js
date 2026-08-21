@@ -6,11 +6,13 @@ export function buildSidebarItems({
   exercises,
   references,
   lessonSlug,
+  homeActive,
 }) {
   const items = [];
   let current = null;
   let firstGroup = true;
   for (const l of lessons) {
+    if (l.slug === 'home') continue;
     const g = l.lesson_group || current || `${name} Tutorial`;
     if (g !== current) {
       if (firstGroup) {
@@ -44,5 +46,10 @@ export function buildSidebarItems({
     items.push({ type: 'group', label: `${name} References` });
     items.push(...references.map((r) => ({ label: r.title })));
   }
+  items.unshift({
+    label: `${name} HOME`,
+    link: `/learn/${slug}`,
+    active: Boolean(homeActive),
+  });
   return items;
 }

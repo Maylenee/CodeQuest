@@ -9,6 +9,36 @@ import { EXERCISE_ITEMS } from '../../data/exercises';
 import { CERTIFICATE_ITEMS } from '../../data/certificates';
 import Logo from '../Logo';
 
+const TOPIC_SLUG_MAP = {
+  HTML: 'html',
+  CSS: 'css',
+  JAVASCRIPT: 'javascript',
+  SQL: 'sql',
+  PYTHON: 'python',
+  JAVA: 'java',
+  PHP: 'php',
+  C: 'c',
+  'C++': 'cpp',
+  'C#': 'c-sharp',
+  'W3.CSS': 'w3-css',
+  BOOTSTRAP: 'bootstrap',
+  REACT: 'react',
+  MYSQL: 'mysql',
+  JQUERY: 'jquery',
+  EXCEL: 'excel',
+  XML: 'xml',
+};
+
+function topicSlug(label) {
+  const key = String(label || '').trim().toUpperCase();
+  if (TOPIC_SLUG_MAP[key]) return TOPIC_SLUG_MAP[key];
+  return String(label || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 const NAV_MODALS = {
   Tutorials: {
     title: 'Tutorial',
@@ -94,14 +124,17 @@ export default function Navbar({
         <TopicsModal
           title={activeTopic ? `${activeTopic} ${modal.title}` : modal.title}
           sectionLabel={modal.sectionLabel}
-          items={modal.items}
+          items={modal.items.map((item) => ({
+            ...item,
+            href: item.href || `/learn/${topicSlug(item.name)}`,
+          }))}
           activeName={activeTopic}
           hero={
             <>
               {activeTopic ? (
                 <MainCard
                   topic={activeTopic}
-                  href={activeTopic === 'HTML' ? '/learn/html' : undefined}
+                  href={`/learn/${topicSlug(activeTopic)}`}
                   onClose={() => setActiveNav(null)}
                   {...modal.mainCard(activeTopic)}
                 />

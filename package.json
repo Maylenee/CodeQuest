@@ -1,9 +1,9 @@
 {
-  "name": "codequest",
+  "name": "codelearn",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "CodeQuest - platform belajar coding interaktif (mirip web3school) di atas EdgeOne Makers (Pages Functions, Agents, Sandbox, Turso).",
+  "description": "CodeLearn - platform belajar coding interaktif (mirip web3school) di atas EdgeOne Makers (Pages Functions, Agents, Sandbox, Turso).",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

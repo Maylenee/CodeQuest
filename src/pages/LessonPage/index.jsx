@@ -464,11 +464,10 @@ export default function LessonPage() {
               items={sidebarItems || []}
               title={`${name.toUpperCase()} TUTORIAL`}
               loading={loading}
-              collapsible
               activeLabel={lesson?.title}
             />
-            <AdCard />
-            <VideoAdCard />
+            {!loading && <AdCard />}
+            {!loading && <VideoAdCard />}
           </div>
         </aside>
 
@@ -491,9 +490,12 @@ export default function LessonPage() {
             <>
               <div className="flex items-center justify-between mb-2">
                 <h1 className="text-[32px] font-bold text-slate-900">{lesson.title}</h1>
-                <button type="button" className="text-emerald-600 text-xl cursor-pointer" aria-label="Bookmark">
-                  🔖
-                </button>
+                <Link
+                  to={`/learn/${slug}`}
+                  className="inline-flex items-center gap-1 text-sm font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 rounded px-3 py-1.5"
+                >
+                  {name} HOME
+                </Link>
               </div>
 
               <div className="mb-8">

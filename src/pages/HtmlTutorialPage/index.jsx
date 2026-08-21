@@ -100,7 +100,7 @@ export default function HtmlTutorialPage() {
         ? SIDEBAR_ITEMS
         : [{ type: 'group', label: `${name} Tutorial` }];
     }
-    return buildSidebarItems({ lessons, slug, name, quizzes, exercises, references });
+    return buildSidebarItems({ lessons, slug, name, quizzes, exercises, references, homeActive: true });
   }, [lessons, slug, name, quizzes, exercises, references, loading]);
 
   const example = useMemo(() => {
@@ -133,12 +133,6 @@ export default function HtmlTutorialPage() {
               />
               <Search size={15} className="text-slate-400" />
             </div>
-            <div className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-600">
-              <span className="hover:text-[#1a2233] cursor-pointer">Get Certified</span>
-              <span className="hover:text-[#1a2233] cursor-pointer">Upgrade</span>
-              <span className="hover:text-[#1a2233] cursor-pointer">Academy</span>
-              <span className="hover:text-[#1a2233] cursor-pointer">Spaces</span>
-            </div>
             <button
               type="button"
               className="bg-emerald-500 text-white font-semibold px-4 py-1.5 rounded hover:bg-emerald-600"
@@ -156,8 +150,8 @@ export default function HtmlTutorialPage() {
         <aside className="w-full lg:w-64 shrink-0 order-1">
           <div className="lg:sticky lg:top-[72px] flex flex-col gap-6">
             <TutorialSidebar items={sidebarItems} title={`${name.toUpperCase()} TUTORIAL`} loading={loading} />
-            <AdCard />
-            <VideoAdCard />
+            {!loading && <AdCard />}
+            {!loading && <VideoAdCard />}
           </div>
         </aside>
 
@@ -313,7 +307,7 @@ export default function HtmlTutorialPage() {
           {/* track progress */}
           <h2 className="text-2xl font-black mt-10">Track Your Progress</h2>
           <p className="text-sm text-slate-600 mt-2 max-w-md">
-            Create a CodeQuest account and get access to more features and
+            Create a CodeLearn account and get access to more features and
             learning materials:
           </p>
           <ul className="mt-4 space-y-2 max-w-md">
@@ -333,14 +327,14 @@ export default function HtmlTutorialPage() {
 
           <div className="mt-8 bg-amber-50 border-l-4 border-amber-300 p-4 text-sm text-slate-700">
             <span className="font-semibold">Note: </span>
-            This is an optional feature. You can study at CodeQuest without
+            This is an optional feature. You can study at CodeLearn without
             creating an account.
           </div>
 
           {/* references */}
           <h2 className="text-2xl font-black mt-10">{name} References</h2>
           <p className="text-sm text-slate-600 mt-2 max-w-2xl">
-            At CodeQuest you will find complete references about {name}
+            At CodeLearn you will find complete references about {name}
             elements, attributes, events, color names, entities,
             character-sets, URL encoding, language codes, HTTP messages,
             browser support, and more.
@@ -362,7 +356,7 @@ export default function HtmlTutorialPage() {
               <p className="text-emerald-700 text-xs font-bold mb-1">{name.toUpperCase()} CERTIFICATION</p>
               <h3 className="text-2xl font-black">Get Certified in {name}</h3>
               <p className="text-sm text-slate-600 mt-2">
-                Complete the CodeQuest {name} course, strengthen your
+                Complete the CodeLearn {name} course, strengthen your
                 knowledge, and earn a certificate you can add to your CV,
                 portfolio, and LinkedIn profile.
               </p>

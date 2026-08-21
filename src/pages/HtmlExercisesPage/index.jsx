@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import { TOP_NAV, LANG_TABS, SIDEBAR_ITEMS } from '../../data/htmlTutorial';
 import { EXERCISES } from '../../data/htmlExercises';
 import { fetchTrack } from '../../lib/api';
+import { buildSidebarItems } from '../../lib/sidebar';
 import LangTabs from '../HtmlTutorialPage/LangTabs';
 import TutorialFooter from '../HtmlTutorialPage/TutorialFooter';
 import TutorialSidebar from '../HtmlTutorialPage/TutorialSidebar';
+import AdCard from '../HtmlTutorialPage/AdCard';
+import VideoAdCard from '../HtmlTutorialPage/VideoAdCard';
 import ExerciseRow from './ExerciseRow';
-import RightRail from './RightRail';
 
 function titleCase(slug) {
   return slug.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -20,15 +22,23 @@ export default function HtmlExercisesPage() {
   const [query, setQuery] = useState('');
   const [name, setName] = useState(titleCase(slug));
   const [lessons, setLessons] = useState([]);
+  const [exercises, setExercises] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
+  const [references, setReferences] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [groups, setGroups] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
     fetchTrack(slug)
       .then((data) => {
         if (cancelled) return;
         setName(data.track?.name || titleCase(slug));
         setLessons(data.lessons || []);
+        setExercises(data.exercises || []);
+        setQuizzes(data.quizzes || []);
+        setReferences(data.references || []);
         setGroups((data.exercises || []).map((g) => ({ name: g.name, count: g.exercises.length })));
       })
       .catch((err) => {
@@ -36,6 +46,9 @@ export default function HtmlExercisesPage() {
         console.warn('[ExercisesPage] fallback ke data statis:', err);
         setLessons([]);
         setGroups(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
     return () => {
       cancelled = true;
@@ -44,10 +57,15 @@ export default function HtmlExercisesPage() {
 
   const list = groups === null ? EXERCISES : groups;
   const filtered = list.filter((e) => e.name.toLowerCase().includes(query.toLowerCase()));
-  const sidebarItems = useMemo(
-    () => (lessons.length ? lessons.map((l) => ({ label: l.title })) : SIDEBAR_ITEMS),
-    [lessons]
-  );
+  const sidebarItems = useMemo(() => {
+    if (loading) return [];
+    if (!lessons.length) {
+      return slug === 'html'
+        ? SIDEBAR_ITEMS
+        : [{ type: 'group', label: `${name} Tutorial` }];
+    }
+    return buildSidebarItems({ lessons, slug, name, quizzes, exercises, references });
+  }, [lessons, slug, name, quizzes, exercises, references, loading]);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans">
@@ -65,12 +83,6 @@ export default function HtmlExercisesPage() {
               />
               <Search size={15} className="text-slate-400" />
             </div>
-            <div className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-600">
-              <span className="hover:text-[#1a2233] cursor-pointer">Get Certified</span>
-              <span className="hover:text-[#1a2233] cursor-pointer">Upgrade</span>
-              <span className="hover:text-[#1a2233] cursor-pointer">Academy</span>
-              <span className="hover:text-[#1a2233] cursor-pointer">Spaces</span>
-            </div>
             <button
               type="button"
               className="bg-emerald-500 text-white font-semibold px-4 py-1.5 rounded hover:bg-emerald-600"
@@ -82,16 +94,21 @@ export default function HtmlExercisesPage() {
       />
       <LangTabs tabs={LANG_TABS} />
 
-      <div className="flex flex-col lg:flex-row gap-6 px-6 py-6">
-        <aside className="w-full lg:w-64 shrink-0">
-          <TutorialSidebar
-            items={sidebarItems}
-            title={`${name.toUpperCase()} TUTORIAL`}
-            activeLabel={`${name} Exercises`}
-          />
+      <div className="flex flex-col lg:flex-row gap-8 px-6 py-8">
+        <aside className="w-full lg:w-64 shrink-0 lg:order-1">
+          <div className="lg:sticky lg:top-[72px] flex flex-col gap-6">
+            <TutorialSidebar
+              items={sidebarItems}
+              title={`${name.toUpperCase()} TUTORIAL`}
+              loading={loading}
+              activeLabel={`${name} Exercises`}
+            />
+            {!loading && <AdCard />}
+            {!loading && <VideoAdCard />}
+          </div>
         </aside>
 
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 lg:order-2">
           {/* ad banner */}
           <div className="border border-slate-200 rounded-md flex items-center gap-4 p-3 mb-6">
             <div className="w-14 h-14 bg-slate-100 rounded shrink-0" />
@@ -112,7 +129,12 @@ export default function HtmlExercisesPage() {
 
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-[30px] font-bold text-slate-900">{name} Exercises</h1>
-            <span className="text-green-600 text-xl cursor-pointer">🔖</span>
+            <Link
+              to={`/learn/${slug}`}
+              className="inline-flex items-center gap-1 text-sm font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 rounded px-3 py-1.5"
+            >
+              {name} HOME
+            </Link>
           </div>
 
           <div className="flex items-center justify-between mb-6">
@@ -239,8 +261,6 @@ export default function HtmlExercisesPage() {
             </button>
           </div>
         </main>
-
-        <RightRail />
       </div>
 
       <TutorialFooter />

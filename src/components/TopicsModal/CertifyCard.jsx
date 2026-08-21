@@ -32,7 +32,7 @@ export default function CertifyCard() {
           <p className="text-[8px] text-slate-500">This certifies that</p>
           <p className="text-[13px] font-semibold text-slate-900 my-1">Your Name</p>
           <p className="text-[7px] text-slate-500 mb-2 px-2">
-            has passed the CodeQuest HTML Certification exam and is hereby declared a
+            has passed the CodeLearn HTML Certification exam and is hereby declared a
           </p>
           <p className="text-[10px] font-black text-slate-900 mb-1 flex items-center justify-center gap-1">
             <Logo className="h-5 w-auto" />

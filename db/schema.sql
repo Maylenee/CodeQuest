@@ -1,5 +1,5 @@
 -- ============================================================
--- CodeQuest — Turso / libSQL schema
+-- CodeLearn — Turso / libSQL schema
 -- Arsitektur: users, tracks, lessons, exercises, quizzes,
 -- progress, certificates, references, conversations, messages
 -- ============================================================
