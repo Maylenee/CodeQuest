@@ -1,22 +1,22 @@
 import { Routes, Route, useParams, Navigate } from 'react-router-dom';
 import LearnHomePage from './pages/LearnHomePage/index.jsx';
-import HtmlTutorialPage from './pages/HtmlTutorialPage/index.jsx';
+import TutorialPage from './pages/TutorialPage/index.jsx';
 import LessonPage from './pages/LessonPage/index.jsx';
-import HtmlExamplesPage from './pages/HtmlExamplesPage/index.jsx';
-import HtmlExercisesPage from './pages/HtmlExercisesPage/index.jsx';
-import HtmlQuizPage from './pages/HtmlQuizPage/index.jsx';
+import ExamplesPage from './pages/ExamplesPage/index.jsx';
+import ExercisesPage from './pages/ExercisesPage/index.jsx';
+import QuizPage from './pages/QuizPage/index.jsx';
 import ChatWidget from './components/ChatWidget/index.jsx';
-import AccountLayout from './components/AccountLayout';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import MyProgressPage from './pages/dashboard/MyProgressPage';
 import LeaguePage from './pages/dashboard/LeaguePage';
 import BookmarksPage from './pages/dashboard/BookmarksPage';
 import CertificatesPage from './pages/dashboard/CertificatesPage';
 import ProfilePage from './pages/dashboard/ProfilePage';
+import PlaygroundPage from './pages/PlaygroundPage/index.jsx';
 
-function HtmlTutorialRoute() {
+function TutorialRoute() {
   const { slug } = useParams();
-  return <HtmlTutorialPage key={slug} />;
+  return <TutorialPage key={slug} />;
 }
 
 function LessonRoute() {
@@ -24,19 +24,19 @@ function LessonRoute() {
   return <LessonPage key={`${slug}/${lessonSlug}`} />;
 }
 
-function HtmlExamplesRoute() {
+function ExamplesRoute() {
   const { slug } = useParams();
-  return <HtmlExamplesPage key={slug} />;
+  return <ExamplesPage key={slug} />;
 }
 
-function HtmlExercisesRoute() {
+function ExercisesRoute() {
   const { slug } = useParams();
-  return <HtmlExercisesPage key={slug} />;
+  return <ExercisesPage key={slug} />;
 }
 
-function HtmlQuizRoute() {
+function QuizRoute() {
   const { slug } = useParams();
-  return <HtmlQuizPage key={slug} />;
+  return <QuizPage key={slug} />;
 }
 
 // Guard: hanya user yang sudah login bisa akses dashboard.
@@ -59,12 +59,13 @@ export default function App() {
     <>
       <Routes>
         <Route path="/" element={<LearnHomePage />} />
-        <Route path="/learn/:slug" element={<HtmlTutorialRoute />} />
-        <Route path="/learn/:slug/home" element={<HtmlTutorialRoute />} />
+        <Route path="/learn/:slug" element={<TutorialRoute />} />
+        <Route path="/learn/:slug/home" element={<TutorialRoute />} />
         <Route path="/learn/:slug/:lessonSlug" element={<LessonRoute />} />
-        <Route path="/learn/:slug/examples" element={<HtmlExamplesRoute />} />
-        <Route path="/learn/:slug/exercises" element={<HtmlExercisesRoute />} />
-        <Route path="/learn/:slug/quiz" element={<HtmlQuizRoute />} />
+        <Route path="/learn/:slug/examples" element={<ExamplesRoute />} />
+        <Route path="/learn/:slug/exercises" element={<ExercisesRoute />} />
+        <Route path="/learn/:slug/quiz" element={<QuizRoute />} />
+        <Route path="/playground" element={<PlaygroundPage />} />
         <Route path="/dashboard" element={<DashboardRoute><DashboardPage /></DashboardRoute>} />
         <Route path="/dashboard/progress" element={<DashboardRoute><MyProgressPage /></DashboardRoute>} />
         <Route path="/dashboard/league" element={<DashboardRoute><LeaguePage /></DashboardRoute>} />

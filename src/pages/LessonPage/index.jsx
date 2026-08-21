@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Bookmark } from 'lucide-react';
@@ -7,11 +7,11 @@ import Navbar from '../../components/Navbar';
 import { TOP_NAV, LANG_TABS } from '../../data/htmlTutorial';
 import { fetchTrack, fetchBookmarks, addBookmark, removeBookmark, recordProgress } from '../../lib/api';
 import { buildSidebarItems } from '../../lib/sidebar';
-import LangTabs from '../HtmlTutorialPage/LangTabs';
-import TutorialSidebar from '../HtmlTutorialPage/TutorialSidebar';
-import AdCard from '../HtmlTutorialPage/AdCard';
-import VideoAdCard from '../HtmlTutorialPage/VideoAdCard';
-import TutorialFooter from '../HtmlTutorialPage/TutorialFooter';
+import LangTabs from '../TutorialPage/LangTabs';
+import TutorialSidebar from '../TutorialPage/TutorialSidebar';
+import AdCard from '../TutorialPage/AdCard';
+import VideoAdCard from '../TutorialPage/VideoAdCard';
+import TutorialFooter from '../TutorialPage/TutorialFooter';
 
 function titleCase(slug) {
   return slug.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -41,11 +41,13 @@ function normalizeFlattenedMarkdown(raw) {
 
   let text = raw.trim()
 
-  // 1) Protect fenced code examples before anything else touches them.
+  // 1) Protect fenced code examples before anything else touches them,
+  // preserving each block's language so CSS/JS examples don't get relabelled
+  // as HTML on restore.
   const codeBlocks = [];
-  text = text.replace(/```\s*([\s\S]*?)\s*```/g, (_, code) => {
-    codeBlocks.push(code.trim());
-    return `\u0000CODEBLOCK${codeBlocks.length - 1}\u0000`;
+  text = text.replace(/```(\w+)?\s*\n?([\s\S]*?)```/g, (_, lang, code) => {
+    codeBlocks.push({ lang: (lang || 'html').toLowerCase(), code: code.trim() });
+    return `\uE000CODEBLOCK${codeBlocks.length - 1}\uE000`;
   });
 
   // 2) Headings: guess where each title ends instead of letting it run into
@@ -102,9 +104,11 @@ function normalizeFlattenedMarkdown(raw) {
   // 5) Bullet list items: " - Foo - Bar" -> "\n- Foo\n- Bar"
   text = text.replace(/\s-\s/g, '\n- ');
 
-  // 6) Restore the protected code blocks as real fenced blocks.
-  text = text.replace(/\u0000CODEBLOCK(\d+)\u0000/g, (_, i) => {
-    return `\n\n\`\`\`html\n${codeBlocks[Number(i)]}\n\`\`\`\n\n`;
+  // 6) Restore the protected code blocks as real fenced blocks, keeping the
+  // original language so the "Try it Yourself" playground routes them right.
+  text = text.replace(/\uE000CODEBLOCK(\d+)\uE000/g, (_, i) => {
+    const b = codeBlocks[Number(i)];
+    return `\n\n\`\`\`${b.lang}\n${b.code}\n\`\`\`\n\n`;
   });
 
   return text.replace(/\n{3,}/g, '\n\n').trim();
@@ -118,7 +122,7 @@ function Code({ children }) {
   );
 }
 
-function ExampleCard({ children }) {
+function ExampleCard({ children, code = '', lang = 'html', onTry }) {
   return (
     <div className="bg-slate-100 rounded-md p-5 my-6">
       <p className="text-[15px] font-bold text-slate-700 mb-3">Example</p>
@@ -128,6 +132,7 @@ function ExampleCard({ children }) {
       </pre>
       <button
         type="button"
+        onClick={() => onTry && onTry(code, lang)}
         className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-semibold px-4 py-2.5 rounded-sm"
       >
         Try it Yourself »
@@ -282,7 +287,8 @@ function NoteBox({ children }) {
   );
 }
 
-const markdownComponents = {
+function makeMarkdownComponents(onTry) {
+  return {
   h2: ({ children }) => (
     <h2 className="text-[24px] font-bold text-slate-900 mt-8 mb-3">{children}</h2>
   ),
@@ -310,14 +316,16 @@ const markdownComponents = {
     const className = codeEl?.props?.className || '';
     const rawChildren = codeEl?.props?.children;
     const text = Array.isArray(rawChildren) ? rawChildren.join('') : String(rawChildren || '');
+    const langMatch = className.match(/language-([\w-]+)/);
+    const lang = langMatch ? langMatch[1].toLowerCase() : 'html';
 
-    if (className.includes('language-browser-preview')) {
+    if (className.includes('browser-preview')) {
       return <BrowserMock {...parseBrowserPreview(text)} />;
     }
-    if (className.includes('language-page-structure')) {
+    if (className.includes('page-structure')) {
       return <PageStructureDiagram {...parsePageStructure(text)} />;
     }
-    return <ExampleCard>{children}</ExampleCard>;
+    return <ExampleCard code={text} lang={lang} onTry={onTry}>{children}</ExampleCard>;
   },
   code: ({ className, children }) => {
     const text = Array.isArray(children) ? children.join('') : String(children || '');
@@ -335,7 +343,8 @@ const markdownComponents = {
   th: ({ children }) => <th className="py-2 pr-4 font-semibold">{children}</th>,
   td: ({ children }) => <td className="py-2 pr-4 text-slate-700">{children}</td>,
   hr: () => <hr className="my-6 border-slate-200" />,
-};
+  };
+}
 
 function NextPrevBar({ slug, prev, next, index, total, title }) {
   const prevBtn = prev ? (
@@ -382,6 +391,7 @@ function NextPrevBar({ slug, prev, next, index, total, title }) {
 
 export default function LessonPage() {
   const { slug = 'html', lessonSlug } = useParams();
+  const navigate = useNavigate();
   const fallbackName = useMemo(() => titleCase(slug), [slug]);
   const userId = useMemo(() => {
     try {
@@ -449,6 +459,23 @@ export default function LessonPage() {
     }, lessonDwellMs);
     return () => clearTimeout(t);
   }, [userId, lesson, track?.id, lessonDwellMs]);
+
+  const handleTry = useCallback(
+    (code, lang) => {
+      const id = `pg_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+      try {
+        sessionStorage.setItem(
+          id,
+          JSON.stringify({ code: code || '', lang, title: lesson?.title })
+        );
+      } catch {
+        /* sessionStorage mungkin tidak tersedia — lanjut saja */
+      }
+      const from = lessonSlug ? `/learn/${slug}/${lessonSlug}` : `/learn/${slug}`;
+      navigate(`/playground?p=${id}&from=${encodeURIComponent(from)}`);
+    },
+    [navigate, lesson?.title, slug, lessonSlug]
+  );
 
   const handleBookmark = async () => {
     if (!userId) {
@@ -607,7 +634,7 @@ export default function LessonPage() {
 
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
-                components={markdownComponents}
+                components={makeMarkdownComponents(handleTry)}
               >
                 {contentMd || 'Konten sedang disiapkan.'}
               </ReactMarkdown>

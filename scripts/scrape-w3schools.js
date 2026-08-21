@@ -178,14 +178,20 @@ function htmlToMarkdown(html) {
     }
   );
 
+  // 2) Proteksi code block (w3-code / pre) sebagai placeholder agar tidak
+  //    ikut dihapus/di-collapse oleh pembersihan tag di bawah. Syntax-highlight
+  //    span dibuang dan entitas di-decode sehingga kode kembali murni.
+  const codeBlocks = [];
+  const storeBlock = (raw, cls) => {
+    const { code, lang } = cleanW3Code(raw, cls || '');
+    codeBlocks.push(`\`\`\`${lang}\n${code}\n\`\`\``);
+    return `\u0002${codeBlocks.length - 1}\u0002`;
+  };
   s = s.replace(
-    /<div class="w3-code[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,
-    (_, code) => '```\n' + decodeHtml(code.replace(/<br\s*\/?>/gi, '\n')).trim() + '\n```\n'
+    /<div class="w3-code([^"]*)"[^>]*>([\s\S]*?)<\/div>/gi,
+    (_, cls, code) => storeBlock(code, cls)
   );
-  s = s.replace(
-    /<pre[^>]*>([\s\S]*?)<\/pre>/gi,
-    (_, code) => '```\n' + decodeHtml(code).trim() + '\n```\n'
-  );
+  s = s.replace(/<pre[^>]*>([\s\S]*?)<\/pre>/gi, (_, code) => storeBlock(code, ''));
 
   s = s.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, c) => '\n## ' + inlineText(c) + '\n');
   s = s.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, c) => '\n## ' + inlineText(c) + '\n');
@@ -213,8 +219,14 @@ function htmlToMarkdown(html) {
   );
 
   s = s.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_, c) => '\n' + blockText(c) + '\n');
-  s = s.replace(/<div[^>]*>([\s\S]*?)<\/div>/gi, (_, c) => '\n' + blockText(c) + '\n');
-  s = s.replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, (_, c) => '\n> ' + blockText(c) + '\n');
+  // div/blockquote adalah container blok — jangan collapse newline (itu yang
+  // menyebabkan heading & code block menyatu dalam satu baris). Cukup buang
+  // tag-nya dan pertahankan markdown di dalamnya.
+  s = s.replace(/<div[^>]*>([\s\S]*?)<\/div>/gi, (_, c) => '\n' + c + '\n');
+  s = s.replace(
+    /<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi,
+    (_, c) => '\n> ' + c.trim().split('\n').join('\n> ') + '\n'
+  );
 
   s = s.replace(
     /<table[^>]*>([\s\S]*?)<\/table>/gi,
@@ -236,18 +248,27 @@ function htmlToMarkdown(html) {
     }
   );
 
-  s = inlineText(s);
-
+  // 4) Bersihkan sisa tag HTML dari teks narasi. Placeholder kode & inline
+  //    tidak mengandung '<' sehingga aman; decode entitas pada teks narasi.
   s = s.replace(/<br\s*\/?>/gi, '\n');
+  s = decodeHtml(s);
   s = s.replace(/<[^>]*>/g, '');
   s = s.replace(/<\/?[a-z][^>]*/gi, ' ');
   s = s.replace(/&#10094;|&#10095;/g, '');
-  s = s.replace(/\n{3,}/g, '\n\n');
-  s = s.replace(/[ \t]+\n/g, '\n');
-  s = s.split('\n').map((l) => l.trimEnd()).join('\n').trim();
+
+  // 5) Kembalikan placeholder: inline code (plain text) lalu code block
+  //    (berisi '<' asli — HARUS sesudah pembersihan tag di atas!).
   inlineCodes.forEach((code, i) => {
     s = s.replace(`\u0001${i}\u0001`, decodeHtml(code));
   });
+  codeBlocks.forEach((code, i) => {
+    s = s.replace(`\u0002${i}\u0002`, code);
+  });
+
+  // 6) Rapikan whitespace berlebih, TAPI pertahankan newline struktural markdown.
+  s = s.replace(/\n{3,}/g, '\n\n');
+  s = s.replace(/[ \t]+\n/g, '\n');
+  s = s.split('\n').map((l) => l.trimEnd()).join('\n').trim();
   return s;
 }
 
@@ -266,6 +287,36 @@ function decodeHtml(s) {
     .replace(/&ndash;/g, '–')
     .replace(/&copy;/g, '©')
     .replace(/&reg;/g, '®');
+}
+
+// Bersihkan isi code block W3Schools agar jadi kode murni: buang span
+// syntax-highlight, ubah <br> jadi newline, decode entitas, lalu deteksi bahasa.
+function cleanW3Code(raw, cls) {
+  let c = raw.replace(/<span[^>]*>/gi, '').replace(/<\/span>/gi, '');
+  c = c.replace(/<br\s*\/?>/gi, '\n');
+  c = decodeHtml(c);
+  let lang = 'html';
+  if (/csshigh/i.test(cls)) lang = 'css';
+  else if (/jshigh|javascripthigh|jsxhigh/i.test(cls)) lang = 'js';
+  else if (/xmlhigh/i.test(cls)) lang = 'xml';
+  return { code: c.trim(), lang };
+}
+
+// Ambil code block pertama (w3-code / pre) sebagai example_code pelajaran.
+function extractExampleCode(html) {
+  let cls = '';
+  let raw = '';
+  const a = html.match(/<div class="w3-code([^"]*)"[^>]*>([\s\S]*?)<\/div>/i);
+  if (a) {
+    cls = a[1];
+    raw = a[2];
+  } else {
+    const b = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
+    if (b) raw = b[1];
+  }
+  if (!raw) return null;
+  const { code } = cleanW3Code(raw, cls);
+  return code || null;
 }
 
 function inlineText(s) {
@@ -314,14 +365,16 @@ async function scrapeTrack(track) {
       const title = path === 'default.asp' ? label : extractMainTitle(html) || label || slug;
       const body = extractMainBody(html);
       const contentMd = body ? htmlToMarkdown(body) : '';
+      const exampleCode = body ? extractExampleCode(body) : null;
       const lessonId = ulid();
       await db.execute(
-        `INSERT INTO lessons (id, track_id, slug, title, content_md, lesson_group, sort_order)
-         VALUES (?, ?, ?, ?, ?, ?, ?)
+        `INSERT INTO lessons (id, track_id, slug, title, content_md, lesson_group, sort_order, example_code)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(track_id, slug) DO UPDATE SET
            title=excluded.title, content_md=excluded.content_md,
-           lesson_group=excluded.lesson_group, sort_order=excluded.sort_order`,
-        [lessonId, trackId, slug, title, contentMd, group || null, ok + 1]
+           lesson_group=excluded.lesson_group, sort_order=excluded.sort_order,
+           example_code=excluded.example_code`,
+        [lessonId, trackId, slug, title, contentMd, group || null, ok + 1, exampleCode]
       );
       ok++;
       process.stdout.write(`  [${ok}] ${slug} (${contentMd.length} chars)\n`);

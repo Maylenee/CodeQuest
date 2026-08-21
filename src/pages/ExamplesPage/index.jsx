@@ -6,11 +6,11 @@ import { TOP_NAV, LANG_TABS, SIDEBAR_ITEMS } from '../../data/htmlTutorial';
 import { EXAMPLES_SECTIONS, MORE_EXAMPLES } from '../../data/htmlExamples';
 import { fetchTrack } from '../../lib/api';
 import { buildSidebarItems } from '../../lib/sidebar';
-import LangTabs from '../HtmlTutorialPage/LangTabs';
-import TutorialSidebar from '../HtmlTutorialPage/TutorialSidebar';
-import TutorialFooter from '../HtmlTutorialPage/TutorialFooter';
-import AdCard from '../HtmlTutorialPage/AdCard';
-import VideoAdCard from '../HtmlTutorialPage/VideoAdCard';
+import LangTabs from '../TutorialPage/LangTabs';
+import TutorialSidebar from '../TutorialPage/TutorialSidebar';
+import TutorialFooter from '../TutorialPage/TutorialFooter';
+import AdCard from '../TutorialPage/AdCard';
+import VideoAdCard from '../TutorialPage/VideoAdCard';
 import ExampleSection from './ExampleSection';
 import Pagination from './Pagination';
 import MoreExamples from './MoreExamples';
@@ -25,7 +25,7 @@ function extractCodeBlocks(md) {
     .filter(Boolean);
 }
 
-export default function HtmlExamplesPage() {
+export default function ExamplesPage() {
   const { slug = 'html' } = useParams();
   const [name, setName] = useState(titleCase(slug));
   const [dbSections, setDbSections] = useState(null);

@@ -6,18 +6,18 @@ import { TOP_NAV, LANG_TABS, SIDEBAR_ITEMS } from '../../data/htmlTutorial';
 import { EXERCISES } from '../../data/htmlExercises';
 import { fetchTrack } from '../../lib/api';
 import { buildSidebarItems } from '../../lib/sidebar';
-import LangTabs from '../HtmlTutorialPage/LangTabs';
-import TutorialFooter from '../HtmlTutorialPage/TutorialFooter';
-import TutorialSidebar from '../HtmlTutorialPage/TutorialSidebar';
-import AdCard from '../HtmlTutorialPage/AdCard';
-import VideoAdCard from '../HtmlTutorialPage/VideoAdCard';
+import LangTabs from '../TutorialPage/LangTabs';
+import TutorialFooter from '../TutorialPage/TutorialFooter';
+import TutorialSidebar from '../TutorialPage/TutorialSidebar';
+import AdCard from '../TutorialPage/AdCard';
+import VideoAdCard from '../TutorialPage/VideoAdCard';
 import ExerciseRow from './ExerciseRow';
 
 function titleCase(slug) {
   return slug.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export default function HtmlExercisesPage() {
+export default function ExercisesPage() {
   const { slug = 'html' } = useParams();
   const [query, setQuery] = useState('');
   const [name, setName] = useState(titleCase(slug));

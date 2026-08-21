@@ -10,7 +10,7 @@ import {
   TAGS,
 } from '../../data/learnHome';
 import { TOP_NAV, LANG_TABS } from '../../data/htmlTutorial';
-import LangTabs from '../HtmlTutorialPage/LangTabs';
+import LangTabs from '../TutorialPage/LangTabs';
 import HeroSection from './HeroSection';
 import BigLangSection from './BigLangSection';
 import SmallLangCard from './SmallLangCard';

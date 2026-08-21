@@ -52,7 +52,7 @@ const FALLBACK_EXAMPLE = {
   php: ['<?php', 'echo "Hello World!";', '?>'],
 };
 
-export default function HtmlTutorialPage() {
+export default function TutorialPage() {
   const { slug = 'html' } = useParams();
   const fallbackName = useMemo(() => titleCase(slug), [slug]);
   const [track, setTrack] = useState(null);
